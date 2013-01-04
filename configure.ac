@@ -21,7 +21,7 @@ SAVE_AUTOMAKE="$AUTOMAKE"
 AC_INIT(configure.ac)
 AM_INIT_AUTOMAKE(libast, 0.7.1)
 AC_DEFINE_UNQUOTED(LIBAST_VERSION, "$VERSION", [Version])
-AM_CONFIG_HEADER(config.h include/libast/sysdefs.h)
+AC_CONFIG_HEADERS(config.h include/libast/sysdefs.h)
 
 LIBTOOLIZE="${SAVE_LIBTOOLIZE:-libtoolize}"
 ACLOCAL="${SAVE_ACLOCAL:-aclocal}"
