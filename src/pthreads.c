@@ -343,7 +343,7 @@ spif_pthreads_tls_calloc(spif_pthreads_t self, size_t count, size_t size)
 
     handle = spif_pthreads_tls_malloc(self, count * size);
     data = spif_pthreads_tls_get(self, handle);
-    MEMSET(data, 0, count * size);
+    memset(data, 0, count * size);
     return handle;
 }
 

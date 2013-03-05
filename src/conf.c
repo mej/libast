@@ -74,7 +74,7 @@ spifconf_init_subsystem(void)
     ctx_cnt = 20;
     ctx_idx = 0;
     context = (ctx_t *) MALLOC(sizeof(ctx_t) * ctx_cnt);
-    MEMSET(context, 0, sizeof(ctx_t) * ctx_cnt);
+    memset(context, 0, sizeof(ctx_t) * ctx_cnt);
     context[0].name = (spif_charptr_t) STRDUP("null");
     context[0].handler = parse_null;
 
@@ -82,19 +82,19 @@ spifconf_init_subsystem(void)
     ctx_state_cnt = 20;
     ctx_state_idx = 0;
     ctx_state = (ctx_state_t *) MALLOC(sizeof(ctx_state_t) * ctx_state_cnt);
-    MEMSET(ctx_state, 0, sizeof(ctx_state_t) * ctx_state_cnt);
+    memset(ctx_state, 0, sizeof(ctx_state_t) * ctx_state_cnt);
 
     /* Initialize the file state stack */
     fstate_cnt = 10;
     fstate_idx = 0;
     fstate = (fstate_t *) MALLOC(sizeof(fstate_t) * fstate_cnt);
-    MEMSET(fstate, 0, sizeof(fstate_t) * fstate_cnt);
+    memset(fstate, 0, sizeof(fstate_t) * fstate_cnt);
 
     /* Initialize the builtin function table */
     builtin_cnt = 10;
     builtin_idx = 0;
     builtins = (spifconf_func_t *) MALLOC(sizeof(spifconf_func_t) * builtin_cnt);
-    MEMSET(builtins, 0, sizeof(spifconf_func_t) * builtin_cnt);
+    memset(builtins, 0, sizeof(spifconf_func_t) * builtin_cnt);
 
     /* Register the omni-present builtin functions */
     spifconf_register_builtin("appname", builtin_appname);
@@ -203,7 +203,7 @@ spifconf_new_var(void)
     spifconf_var_t *v;
 
     v = (spifconf_var_t *) MALLOC(sizeof(spifconf_var_t));
-    MEMSET(v, 0, sizeof(spifconf_var_t));
+    memset(v, 0, sizeof(spifconf_var_t));
     return v;
 }
 

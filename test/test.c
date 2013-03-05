@@ -60,16 +60,6 @@ test_macros(void)
     unsigned long sl1 = 0x98765432, sl2 = 0xffeeddff;
     void *vp1 = &sc1, *vp2 = &sc2;
 
-    TEST_BEGIN("MEMSET() macro");
-    MEMSET(memset_test, '!', CONST_STRLEN(memset_test));
-    TEST_FAIL_IF(strcmp((char *) memset_test, "!!!!!!!!!!!!!!!!!!!!!!!!!!"));
-    MEMSET(memset_test + 3, '*', 14);
-    TEST_FAIL_IF(strcmp((char *) memset_test, "!!!**************!!!!!!!!!"));
-    MEMSET(memset_test, '&', 0 );
-    TEST_FAIL_IF(strcmp((char *) memset_test, "!!!**************!!!!!!!!!"));
-    MEMSET((spif_charptr_t) NULL, '_', CONST_STRLEN(memset_test));
-    TEST_PASS();
-
     TEST_BEGIN("SWAP() macro");
     SWAP(sc1, sc2);
     SWAP(si1, si2);
@@ -2709,7 +2699,7 @@ test_hash_functions(void)
                     && (key_length % 4)) {
                     continue;
                 }
-                MEMSET(buff, 0, sizeof(buff));
+                memset(buff, 0, sizeof(buff));
 
                 if (hash_func == spifhash_jenkins32) {
                     ref_hash = hash_func(pbuff, key_length / 4, 1);

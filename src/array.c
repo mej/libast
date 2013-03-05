@@ -683,7 +683,7 @@ spif_array_insert_at(spif_array_t self, spif_obj_t obj, spif_listidx_t idx)
     } else if (left < 0) {
         /* NULL out the new gap in the list. */
         left = -left;
-        MEMSET(self->items + (idx - left), 0, sizeof(spif_obj_t) * left);
+        memset(self->items + (idx - left), 0, sizeof(spif_obj_t) * left);
     }
     self->items[idx] = obj;
     self->len++;

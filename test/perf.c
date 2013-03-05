@@ -680,7 +680,7 @@ perf_url(void)
     spif_charptr_t tmp3 = "/path/to/some/file.jpg";
     spif_charptr_t tmp4 = "pop3://dummy:moo@pop.nowhere.com:110";
 
-    PERF_SET_REPS(100);
+    PERF_SET_REPS(10);
 
     PERF_BEGIN("spif_url_new_from_ptr() function");
     PERF_TEST(testurl = spif_url_new_from_ptr(tmp1); spif_url_del(testurl););
