@@ -253,13 +253,10 @@ AC_DEFUN([AST_STD_CHECKS], [
 
     dnl# These must be run after AC_PROG_CC but before any other macros that use
     dnl# the C compiler
-    AC_AIX
     AC_ISC_POSIX
-    AC_MINIX
 
     dnl# At least make the attempt to support CygWin32
     AC_CYGWIN
-    AC_ARG_PROGRAM
 
     AM_PROG_LIBTOOL
 
@@ -340,6 +337,36 @@ AC_DEFUN([AST_TYPE_CHECKS], [
     AC_TYPE_PID_T
     AC_TYPE_UID_T
 ])
+
+dnl#
+dnl# LibAST Compiler Checks
+dnl#
+AC_DEFUN([AST_COMPILER_CHECKS], [
+    AC_MSG_CHECKING([for ({...}) compiler support])
+    AC_CACHE_VAL(ast_compiler_compound_statement_expr, [
+        AC_TRY_COMPILE(
+            changequote(<<, >>)dnl
+<<
+int main(void)
+{
+    int a = 1, b = 2, c = 3, d;
+
+    d = ({ b *= c; a += b - c; a + b + c; });
+    return 0;
+} >>
+            changequote([, ])
+        , ast_compiler_compound_statement_expr=0, ast_compiler_compound_statement_expr=1, ast_compiler_compound_statement_expr=2)
+    ])
+    if test $ast_compiler_compound_statement_expr -eq 0; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([LIBAST_SUPPORT_MACRO_CSE], [1], [Defined if compiler supports compound statement expressions.])
+    elif test $ast_compiler_compound_statement_expr -eq 1; then
+        AC_MSG_RESULT([no])
+    else
+        AC_MSG_RESULT([unknown, assuming none])
+    fi
+])
+
 
 dnl#
 dnl# LibAST argument macros
@@ -462,7 +489,7 @@ exit(0);
     ])
     if test $dps_cv_snprintf_bug -eq 0; then
         AC_MSG_RESULT([no, snprintf is ok])
-    elif test $dps_cv_snprint_bug -eq 1; then
+    elif test $dps_cv_snprintf_bug -eq 1; then
         AC_MSG_RESULT([yes, snprintf is broken])
         AC_DEFINE([HAVE_SNPRINTF_BUG], [1], [Defined if libc snprintf is buggy.])
     else

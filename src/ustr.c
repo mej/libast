@@ -712,28 +712,36 @@ spif_ustr_sprintf(spif_ustr_t self, spif_charptr_t format, ...)
     va_list ap;
 
     ASSERT_RVAL(!SPIF_USTR_ISNULL(self), FALSE);
-    va_start(ap, format);
     if (self->s != (spif_charptr_t) NULL) {
         spif_ustr_done(self);
     }
-    if (*format == 0) {
+    if (!format) {
+        return FALSE;
+    } else if (*format == 0) {
         return TRUE;
-    } else if (*(format + 1) == 0) {
-        return spif_ustr_init_from_ptr(self, format);
     } else {
         int c;
         char buff[2];
 
+        va_start(ap, format);
         c = vsnprintf(buff, sizeof(buff), format, ap);
+        va_end(ap);
         if (c <= 0) {
-            return TRUE;
+            return FALSE;
         } else {
-            self->len = c;
             self->size = c + 1;
             self->s = (spif_charptr_t) MALLOC(self->size);
-            c = vsnprintf(self->s, c + 1, format, ap);
+            va_start(ap, format);
+            c = vsnprintf(self->s, self->size, format, ap);
+            va_end(ap);
+            if (c > -1 && c < self->size) {
+                self->len = c;
+                return TRUE;
+            } else {
+                self->s[0] = 0;
+                return FALSE;
+            }
         }
-        return ((c >= 0) ? (TRUE) : (FALSE));
     }
     ASSERT_NOTREACHED_RVAL(FALSE);
 }

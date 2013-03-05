@@ -515,43 +515,135 @@ extern int re_exec();
 #if DEBUG >= 1
 # if defined(__FILE__) && defined(__LINE__)
 #  ifdef __GNUC__
-#   define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed in %s() at %s:%d:  %s\n", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                                    else {libast_print_warning("ASSERT failed in %s() at %s:%d:  %s\n", __FUNCTION__, __FILE__, __LINE__, #x); return;}}} while (0)
-#   define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed in %s() at %s:%d:  %s\n", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                                              else {libast_print_warning("ASSERT failed in %s() at %s:%d:  %s\n", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                               return (val);}} while (0)
-#   define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", __FUNCTION__, __FILE__, __LINE__);} \
-                                                   else {libast_print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", __FUNCTION__, __FILE__, __LINE__);} \
-                                    } while (0)
-#   define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", __FUNCTION__, __FILE__, __LINE__);} \
-                                                           else {libast_print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", __FUNCTION__, __FILE__, __LINE__);} \
-                                            return (val);} while (0)
+#   define ASSERT(x)  do { \
+                          if (!(x)) { \
+                              if (DEBUG_LEVEL >= 1) { \
+                                  libast_fatal_error("ASSERT failed in %s() at %s:%d:  %s\n", \
+                                                     __FUNCTION__, __FILE__, __LINE__, #x); \
+                              } else { \
+                                  libast_print_warning("ASSERT failed in %s() at %s:%d:  %s\n", \
+                                                       __FUNCTION__, __FILE__, __LINE__, #x); \
+                                  return; \
+                              } \
+                          } \
+                      } while (0)
+#   define ASSERT_RVAL(x, val)  do { \
+                                    if (!(x)) { \
+                                        if (DEBUG_LEVEL >= 1) { \
+                                            libast_fatal_error("ASSERT failed in %s() at %s:%d:  %s\n", \
+                                                               __FUNCTION__, __FILE__, __LINE__, #x); \
+                                        } else { \
+                                            libast_print_warning("ASSERT failed in %s() at %s:%d:  %s\n", \
+                                                                 __FUNCTION__, __FILE__, __LINE__, #x); \
+                                            return (val); \
+                                        } \
+                                    } \
+                                } while (0)
+#   define ASSERT_NOTREACHED()  \
+        do { \
+            if (DEBUG_LEVEL >= 1) { \
+                libast_fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", \
+                                   __FUNCTION__, __FILE__, __LINE__); \
+            } else { \
+                libast_print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", \
+                                     __FUNCTION__, __FILE__, __LINE__);} \
+        } while (0)
+#   define ASSERT_NOTREACHED_RVAL(val) \
+        do { \
+            if (DEBUG_LEVEL >= 1) { \
+                libast_fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", \
+                                   __FUNCTION__, __FILE__, __LINE__); \
+            } else { \
+                libast_print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.\n", \
+                                     __FUNCTION__, __FILE__, __LINE__); \
+            } \
+            return (val); \
+        } while (0)
 #   define ABORT() libast_fatal_error("Aborting in %s() at %s:%d.\n", __FUNCTION__, __FILE__, __LINE__)
 #  else
-#   define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x);} \
-                                                    else {libast_print_warning("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x); return;}}} while (0)
-#   define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x);} \
-                                                              else {libast_print_warning("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x);} \
-                                               return (val);}} while (0)
-#   define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__);} \
-                                                   else {libast_print_warning("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__);} \
-                                    } while (0)
-#   define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__);} \
-                                                           else {libast_print_warning("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__);} \
-                                            return (val);} while (0)
+#   define ASSERT(x)  do { \
+                          if (!(x)) { \
+                              if (DEBUG_LEVEL >= 1) { \
+                                  libast_fatal_error("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x); \
+                              } else { \
+                                  libast_print_warning("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x); \
+                                  return; \
+                              } \
+                          } \
+                      } while (0)
+#   define ASSERT_RVAL(x, val)  do { \
+                                    if (!(x)) { \
+                                        if (DEBUG_LEVEL >= 1) { \
+                                            libast_fatal_error("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x); \
+                                        } else { \
+                                            libast_print_warning("ASSERT failed at %s:%d:  %s\n", __FILE__, __LINE__, #x); \
+                                        } \
+                                        return (val); \
+                                    } \
+                                } while (0)
+#   define ASSERT_NOTREACHED()  do { \
+                                    if (DEBUG_LEVEL >= 1) { \
+                                        libast_fatal_error("ASSERT failed at %s:%d:  This code should not be reached.\n", \
+                                                           __FILE__, __LINE__); \
+                                    } else { \
+                                        libast_print_warning("ASSERT failed at %s:%d:  This code should not be reached.\n", \
+                                                             __FILE__, __LINE__); \
+                                    } \
+                                } while (0)
+#   define ASSERT_NOTREACHED_RVAL(val) \
+        do { \
+            if (DEBUG_LEVEL >= 1) { \
+                libast_fatal_error("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__); \
+            } else { \
+                libast_print_warning("ASSERT failed at %s:%d:  This code should not be reached.\n", __FILE__, __LINE__); \
+            } \
+            return (val); \
+        } while (0)
 #   define ABORT() libast_fatal_error("Aborting at %s:%d.\n", __FILE__, __LINE__)
 #  endif
 # else
-#  define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed:  %s\n", #x);} \
-                                                   else {libast_print_warning("ASSERT failed:  %s\n", #x); return;}}} while (0)
-#  define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {libast_fatal_error("ASSERT failed:  %s\n", #x);} \
-                                                             else {libast_print_warning("ASSERT failed:  %s\n", #x);} return (val);}} while (0)
+#  define ASSERT(x)  do { \
+                         if (!(x)) { \
+                             if (DEBUG_LEVEL >= 1) { \
+                                 libast_fatal_error("ASSERT failed:  %s\n", #x); \
+                             } else { \
+                                 libast_print_warning("ASSERT failed:  %s\n", #x); \
+                                 return; \
+                             } \
+                         } \
+                     } while (0)
+#  define ASSERT_RVAL(x, val)  do { \
+                                   if (!(x)) { \
+                                       if (DEBUG_LEVEL >= 1) { \
+                                           libast_fatal_error("ASSERT failed:  %s\n", #x); \
+                                       } else { \
+                                           libast_print_warning("ASSERT failed:  %s\n", #x); \
+                                       } \
+                                       return (val); \
+                                   } \
+                               } while (0)
 #  define ASSERT_NOTREACHED()           return
 #  define ASSERT_NOTREACHED_RVAL(x)     return (x)
 #  define ABORT()                       libast_fatal_error("Aborting.\n")
 # endif
-# define REQUIRE(x)                     do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libast_dprintf("REQUIRE failed:  %s\n", #x);} return;}} while (0)
-# define REQUIRE_RVAL(x, v)             do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libast_dprintf("REQUIRE failed:  %s\n", #x);} return (v);}} while (0)
+# define REQUIRE(x)                     do { \
+                                            if (!(x)) { \
+                                                if (DEBUG_LEVEL >= 1) { \
+                                                    __DEBUG(); \
+                                                    libast_dprintf("REQUIRE failed:  %s\n", #x); \
+                                                } \
+                                                return; \
+                                            } \
+                                        } while (0)
+# define REQUIRE_RVAL(x, v)             do { \
+                                            if (!(x)) { \
+                                                if (DEBUG_LEVEL >= 1) { \
+                                                    __DEBUG(); \
+                                                    libast_dprintf("REQUIRE failed:  %s\n", #x); \
+                                                } \
+                                                return (v); \
+                                            } \
+                                        } while (0)
 #else
 # define ASSERT(x)                      NOP
 # define ASSERT_RVAL(x, val)            NOP

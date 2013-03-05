@@ -1,5 +1,5 @@
 %define __os_install_post /usr/lib/rpm/brp-compress
-%if %{?optflags:1}0
+%if %{!?optflags:1}0
 %define optflags ${RPM_OPT_FLAGS:--O0 -g3}
 %endif
 

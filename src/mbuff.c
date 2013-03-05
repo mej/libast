@@ -664,24 +664,33 @@ spif_mbuff_sprintf(spif_mbuff_t self, spif_charptr_t format, ...)
     if (self->buff != (spif_byteptr_t) NULL) {
         spif_mbuff_done(self);
     }
-    if (*format == 0) {
+    if (!format) {
+        return FALSE;
+    } else if (*format == 0) {
         return TRUE;
-    } else if (*(format + 1) == 0) {
-        return spif_mbuff_init_from_ptr(self, format, 2);
     } else {
         int c;
         char buff[2];
 
+        va_start(ap, format);
         c = vsnprintf(buff, sizeof(buff), format, ap);
+        va_end(ap);
         if (c <= 0) {
-            return TRUE;
+            return FALSE;
         } else {
             c++;
-            self->len = self->size = c;
+            self->size = c;
             self->buff = (spif_charptr_t) MALLOC(self->size);
+            va_start(ap, format);
             c = vsnprintf(self->buff, self->size, format, ap);
+            va_end(ap);
+            if (c > -1 && c < self->size) {
+                self->len = c;
+                return TRUE;
+            } else {
+                return FALSE;
+            }
         }
-        return ((c >= 0) ? (TRUE) : (FALSE));
     }
     ASSERT_NOTREACHED_RVAL(FALSE);
 }
