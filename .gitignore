@@ -8,6 +8,8 @@ ltmain.sh
 Makefile
 Makefile.in
 aclocal.m4
+libtool.m4
+lt*.m4
 config.status
 config.h
 libtool
@@ -26,6 +28,14 @@ Makefile.in
 lib*.la
 *.da
 *.lo
+*.o
 libast-config
 autom4te*
 depcomp
+*.orig
+*.rej
+*~
+libast-test
+libast-perf
+include/libast/sysdefs.h
+include/libast/types.h
