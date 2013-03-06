@@ -3,8 +3,12 @@
 AC_INIT(configure.ac)
 AM_INIT_AUTOMAKE([libast], [0.8])
 AC_DEFINE_UNQUOTED(LIBAST_VERSION, "$VERSION", [Version])
-AC_CONFIG_HEADERS([config.h include/libast/sysdefs.h])
 AC_CONFIG_MACRO_DIR([.])
+
+AC_CONFIG_HEADERS([config.h include/libast/sysdefs.h])
+AC_CONFIG_FILES([include/libast/types.h Makefile include/Makefile
+                 include/libast/Makefile src/Makefile test/Makefile
+                 libast-config])
 
 dnl# Set some basic variables
 AUTHORS="Michael Jennings (mej@eterm.org)"
@@ -51,7 +55,7 @@ AC_TRY_RUN([
                AC_MSG_RESULT(yes)
                AC_DEFINE(STRICT_ISO_C99, 1, [Defined if strict ISO C99 (9899:1999) is requested or required.])
            ], [
-               AC_MSG_RESULT(no - assumed because cross-compiling)
+               AC_MSG_RESULT([no - assumed because cross-compiling])
 ])
 
 AST_X11_SUPPORT()
@@ -71,9 +75,13 @@ AC_SUBST(LDFLAGS)
 AC_SUBST(LIBS)
 
 basedir=.
-AC_OUTPUT(include/libast/types.h Makefile include/Makefile \
-          include/libast/Makefile src/Makefile test/Makefile \
-          libast-config)
+AH_TOP([
+#pragma once
+])
+AH_BOTTOM([
+])
+AC_OUTPUT
+
 test -f libast-config && chmod 755 libast-config
 
 AST_STATUS()

@@ -317,7 +317,7 @@ AC_DEFUN([AST_HEADER_CHECKS], [
     AC_HEADER_SYS_WAIT
     AC_CHECK_HEADERS(fcntl.h termios.h sys/ioctl.h sys/select.h sys/time.h \
                      sys/sockio.h sys/byteorder.h malloc.h utmpx.h unistd.h \
-                     bsd/signal.h stdarg.h errno.h)
+                     bsd/signal.h stdarg.h errno.h inttypes.h)
     AC_HEADER_TIME
 ])
 AC_DEFUN([AST_FUNC_CHECKS], [
@@ -330,6 +330,7 @@ AC_DEFUN([AST_FUNC_CHECKS], [
     dps_symlink_open_bug()
     dps_rlimit_nproc()
     dps_rlimit_memlock()
+    AC_FUNC_ALLOCA
 ])
 AC_DEFUN([AST_TYPE_CHECKS], [
     AC_TYPE_MODE_T
@@ -343,7 +344,7 @@ dnl# LibAST Compiler Checks
 dnl#
 AC_DEFUN([AST_COMPILER_CHECKS], [
     AC_MSG_CHECKING([for ({...}) compiler support])
-    AC_CACHE_VAL(ast_compiler_compound_statement_expr, [
+    AC_CACHE_VAL(ast_cv_compiler_compound_statement_expr, [
         AC_TRY_COMPILE(
             changequote(<<, >>)dnl
 <<
@@ -354,13 +355,15 @@ int main(void)
     d = ({ b *= c; a += b - c; a + b + c; });
     return 0;
 } >>
-            changequote([, ])
-        , ast_compiler_compound_statement_expr=0, ast_compiler_compound_statement_expr=1, ast_compiler_compound_statement_expr=2)
+            changequote([, ]),
+        [ast_cv_compiler_compound_statement_expr=0],
+        [ast_cv_compiler_compound_statement_expr=1],
+        [ast_cv_compiler_compound_statement_expr=2])
     ])
-    if test $ast_compiler_compound_statement_expr -eq 0; then
+    if test $ast_cv_compiler_compound_statement_expr -eq 0; then
         AC_MSG_RESULT([yes])
         AC_DEFINE([LIBAST_SUPPORT_MACRO_CSE], [1], [Defined if compiler supports compound statement expressions.])
-    elif test $ast_compiler_compound_statement_expr -eq 1; then
+    elif test $ast_cv_compiler_compound_statement_expr -eq 1; then
         AC_MSG_RESULT([no])
     else
         AC_MSG_RESULT([unknown, assuming none])
@@ -430,7 +433,7 @@ AC_DEFUN([AST_FLAGS], [
     CFLAGS=${CFLAGS--O}
     LDFLAGS=`eval eval eval eval eval echo "-L$libdir -L$prefix/lib ${LDFLAGS--O}"`
     LDFLAGS=`echo $LDFLAGS | tr ' ' '\n' | uniq | grep -v NONE | tr '\n' ' '`
-    LIBS="$GRLIBS $X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
+    LIBS="$X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 ])
 
 dnl#
