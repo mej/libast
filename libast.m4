@@ -1,6 +1,34 @@
 dnl#####################################################################
 dnl# Autoconf m4 macros for LibAST
-dnl# $Id$
+dnl#
+dnl# Copyright (C) 1997-2013, Michael Jennings <mej@eterm.org>
+dnl# 
+dnl# Copyright (C) 2013, The Regents of the University of California,
+dnl# through Lawrence Berkeley National Laboratory (subject to receipt of
+dnl# any required approvals from the U.S. Dept. of Energy).
+dnl# 
+dnl# Permission is hereby granted, free of charge, to any person obtaining
+dnl# a copy of this software and associated documentation files (the
+dnl# "Software"), to deal in the Software without restriction, including
+dnl# without limitation the rights to use, copy, modify, merge, publish,
+dnl# distribute, sublicense, and/or sell copies of the Software, and to
+dnl# permit persons to whom the Software is furnished to do so, subject to
+dnl# the following conditions:
+dnl# 
+dnl# The above copyright notice and this permission notice shall be
+dnl# included in all copies of the Software, its documentation and
+dnl# marketing & publicity materials, and acknowledgment shall be given in
+dnl# the documentation, materials and software packages that this Software
+dnl# was used.
+dnl# 
+dnl# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+dnl# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+dnl# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+dnl# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+dnl# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+dnl# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+dnl# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+dnl#
 dnl#####################################################################
 
 dnl#
@@ -433,7 +461,7 @@ AC_DEFUN([AST_FLAGS], [
     CFLAGS=${CFLAGS--O}
     LDFLAGS=`eval eval eval eval eval echo "-L$libdir -L$prefix/lib ${LDFLAGS--O}"`
     LDFLAGS=`echo $LDFLAGS | tr ' ' '\n' | uniq | grep -v NONE | tr '\n' ' '`
-    LIBS="$X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
+    LIBS="$GRLIBS $X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 ])
 
 dnl#
