@@ -1260,6 +1260,17 @@ extern int re_exec();
 # endif
 # define STRDUP(s)                              spifmem_strdup(#s, __FILE__, __LINE__, (s))
 # define MALLOC_DUMP()                          spifmem_dump_mem_tables()
+
+/* X11 Wrappers */
+# if 0 && defined(LIBAST_SUPPORT_MACRO_CSE)
+#  define X_CREATE_PIXMAP(d, win, w, h, depth)  ({ \
+       Pixmap p = XCreatePixmap((d), (win), (w), (h), (depth)); \
+       D_MEM(("Created %ux%u pixmap 0x%08x of depth %u for window 0x%08x at %s:%lu\n", (w), (h), p, (depth), (win), __FILE__, __LINE__)); \
+       if (p == None) return p; \
+       memrec_add_var(&pixmap_rec, (spif_charptr_t) NONULL(filename), line, (void *) p, w * h * (depth / 8)); \
+       p; \
+   })
+# endif
 # define X_CREATE_PIXMAP(d, win, w, h, depth)   spifmem_x_create_pixmap(__FILE__, __LINE__, (d), (win), (w), (h), (depth))
 # define X_FREE_PIXMAP(d, p)                    spifmem_x_free_pixmap(#p, __FILE__, __LINE__, (d), (p))
 # if LIBAST_IMLIB2_SUPPORT
