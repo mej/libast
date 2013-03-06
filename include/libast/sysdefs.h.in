@@ -195,8 +195,8 @@
 #ifndef WITH_DMALLOC
 #  define WITH_DMALLOC 0
 #endif
-#ifndef MALLOC_CALL_DEBUG
-#  define MALLOC_CALL_DEBUG 0
+#ifndef MALLOC_CALL_COUNT
+#  define MALLOC_CALL_COUNT 0
 #endif
 
 

@@ -61,59 +61,6 @@ extern spif_charptr_t libast_program_name, libast_program_version;
 
 
 
-/********************************* MEM GOOP ***********************************/
-/**
- * Filename length limit.
- *
- * This is used to limit the maximum length of a source filename.
- * When tracking memory allocation, the filename and line number for
- * each MALLOC()/REALLOC()/CALLOC()/FREE() call is recorded.  A small
- * buffer of static length is used to speed things up.
- *
- * @see MALLOC(), REALLOC(), CALLOC(), FREE()
- * @ingroup DOXGRP_MEM
- */
-#define LIBAST_FNAME_LEN  20
-
-/**
- * Pointer tracking structure.
- *
- * This structure is used by LibAST's memory management system to keep
- * track of what pointers have been allocated, where they were
- * allocated, and how much space was requested.
- *
- * @see MALLOC(), REALLOC(), CALLOC(), FREE()
- * @ingroup DOXGRP_MEM
- */
-typedef struct ptr_t_struct {
-    /** The allocated pointer.  The allocated pointer. */
-    void *ptr;
-    /** The pointer's size, in bytes.  The pointer's size, in bytes. */
-    size_t size;
-    /** Filename.  The file which last (re)allocated the pointer. */
-    spif_char_t file[LIBAST_FNAME_LEN + 1];
-    /** Line number.  The line number where the pointer was last (re)allocated. */
-    spif_uint32_t line;
-} ptr_t;
-/**
- * Pointer list structure.
- *
- * This structure is used by LibAST's memory management system to hold
- * the list of pointers being tracked.  This list is maintained as an
- * array for simplicity.
- *
- * @see MALLOC(), REALLOC(), CALLOC(), FREE(), ptr_t_struct
- * @ingroup DOXGRP_MEM
- */
-typedef struct memrec_t_struct {
-    /** Pointer count.  The number of pointers being tracked. */
-    size_t cnt;
-    /** Pointer list.  The list of tracked pointers. */
-    ptr_t *ptrs;
-} memrec_t;
-
-
-
 /******************************** CONF GOOP ***********************************/
 /**
  * Convert context name to ID.
@@ -300,7 +247,7 @@ typedef struct memrec_t_struct {
  * @see @link DOXGRP_CONF_CTX Context Handling @endlink
  * @ingroup DOXGRP_CONF_CTX
  */
-typedef struct ctx_t_struct {
+typedef struct ctx_t {
     /**
      * Context name.
      *
@@ -333,7 +280,7 @@ typedef struct ctx_t_struct {
  * @see @link DOXGRP_CONF_CTX Context Handling @endlink
  * @ingroup DOXGRP_CONF_CTX
  */
-typedef struct ctx_state_t_struct {
+typedef struct ctx_state_t {
     /**
      * Context ID.
      *
@@ -344,7 +291,7 @@ typedef struct ctx_state_t_struct {
      * Context state.
      *
      * The state for the context.  This holds the state variable in
-     * between calls to the handler (ctx_t_struct#handler).
+     * between calls to the handler (ctx_t#handler).
      */
     void *state;
 } ctx_state_t;
@@ -359,7 +306,7 @@ typedef struct ctx_state_t_struct {
  * @see @link DOXGRP_CONF_CTX Context Handling @endlink
  * @ingroup DOXGRP_CONF_CTX
  */
-typedef struct spifconf_func_t_struct {
+typedef struct spifconf_func_t {
     /**
      * Function name.
      *
@@ -386,7 +333,7 @@ typedef struct spifconf_func_t_struct {
  * @see @link DOXGRP_CONF_CTX Context Handling @endlink, builtin_get(), builtin_put()
  * @ingroup DOXGRP_CONF_CTX
  */
-typedef struct spifconf_var_t_struct {
+typedef struct spifconf_var_t {
     /**
      * Variable name.
      *
@@ -406,7 +353,7 @@ typedef struct spifconf_var_t_struct {
      *
      * Pointer to the next variable in the list.
      */
-    struct spifconf_var_t_struct *next;
+    struct spifconf_var_t *next;
 } spifconf_var_t;
 
 
@@ -420,7 +367,7 @@ typedef struct spifconf_var_t_struct {
  * parsing error is encountered.  This macro increments the bad option
  * count within the parser and checks to see if the count has now
  * exceeded the threshold.  If so, the registered help handler
- * (spifopt_settings_t_struct#help_handler) via the
+ * (spifopt_settings_t#help_handler) via the
  * #SPIFOPT_HELPHANDLER() macro.  If not, an error message is printed
  * noting that behavior may be abnormal but that parsing will
  * continue.

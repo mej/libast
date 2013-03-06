@@ -466,13 +466,13 @@ typedef unsigned int spif_uint_t;
 typedef unsigned long spif_ulong_t;
 
 /**
- * A pointer to a signed char.
+ * A pointer to char.
  *
- * A pointer to a signed char.
+ * A pointer to char.
  *
  * @see @link DOXGRP_TYPES Portable Data Types @endlink
  */
-typedef spif_char_t *spif_charptr_t;
+typedef char *spif_charptr_t;
 
 /**
  * A pointer to a byte of data.
