@@ -373,28 +373,23 @@ dnl#
 AC_DEFUN([AST_COMPILER_CHECKS], [
     AC_MSG_CHECKING([for ({...}) compiler support])
     AC_CACHE_VAL(ast_cv_compiler_compound_statement_expr, [
-        AC_TRY_COMPILE(
+        AC_TRY_COMPILE([],
             changequote(<<, >>)dnl
 <<
-int main(void)
-{
     int a = 1, b = 2, c = 3, d;
 
     d = ({ b *= c; a += b - c; a + b + c; });
     return 0;
-} >>
+>>
             changequote([, ]),
         [ast_cv_compiler_compound_statement_expr=0],
-        [ast_cv_compiler_compound_statement_expr=1],
-        [ast_cv_compiler_compound_statement_expr=2])
+        [ast_cv_compiler_compound_statement_expr=1])
     ])
     if test $ast_cv_compiler_compound_statement_expr -eq 0; then
         AC_MSG_RESULT([yes])
         AC_DEFINE([LIBAST_SUPPORT_MACRO_CSE], [1], [Defined if compiler supports compound statement expressions.])
-    elif test $ast_cv_compiler_compound_statement_expr -eq 1; then
-        AC_MSG_RESULT([no])
     else
-        AC_MSG_RESULT([unknown, assuming none])
+        AC_MSG_RESULT([no])
     fi
 ])
 
