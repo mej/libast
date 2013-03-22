@@ -1,5 +1,5 @@
 /*
- * Copyvalue (C) 1997-2004, Michael Jennings
+ * Copyvalue (C) 1997-2013, Michael Jennings <mej@eterm.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to

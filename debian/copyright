@@ -5,11 +5,15 @@ It was downloaded from the enlightenment cvs tree:
 
   http://sourceforge.net/cvs/?group_id=2
   
-Upstream Author(s): Michael Jennings <mej@valinux.com>
+Upstream Author(s): Michael Jennings <mej@eterm.org>
 
 Copyright:
 
-Copyright (C) 1997-2004, Michael Jennings
+Copyright (C) 1997-2013, Michael Jennings <mej@eterm.org>
+
+Copyright (C) 2013, The Regents of the University of California,
+through Lawrence Berkeley National Laboratory (subject to receipt of
+any required approvals from the U.S. Dept. of Energy).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
