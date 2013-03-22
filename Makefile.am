@@ -1,5 +1,3 @@
-# $Id$
-
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I .
 SUBDIRS = include src test

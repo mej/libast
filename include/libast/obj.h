@@ -33,8 +33,6 @@
  * manipulating basic generic objects.
  *
  * @author Michael Jennings <mej@eterm.org>
- * $Revision$
- * $Date$
  */
 
 /*@{*/

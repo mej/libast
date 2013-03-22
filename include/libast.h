@@ -30,8 +30,6 @@
  * including all required system headers and LibAST Object headers.
  *
  * @author Michael Jennings <mej@eterm.org>
- * @version $Revision$
- * @date $Date$
  */
 
 #ifndef _LIBAST_H_

@@ -28,11 +28,7 @@
  * This file contains all non-cpp-based debugging functionality.
  *
  * @author Michael Jennings <mej@eterm.org>
- * $Revision$
- * $Date$
  */
-
-static const char __attribute__((unused)) cvs_ident[] = "$Id$";
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

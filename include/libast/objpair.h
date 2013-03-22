@@ -32,8 +32,6 @@
  * This file contains the declarations for the paired object type.
  *
  * @author Michael Jennings <mej@eterm.org>
- * $Revision$
- * $Date$
  */
 
 /*@{*/

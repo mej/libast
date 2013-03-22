@@ -1,5 +1,3 @@
-# $Id$
-
 EXTRA_PROGRAMS = libast-test libast-perf
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE)

@@ -21,8 +21,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-static const char __attribute__((unused)) cvs_ident[] = "$Id$";
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif

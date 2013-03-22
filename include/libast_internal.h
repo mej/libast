@@ -29,8 +29,6 @@
  * are restricted to internal LibAST use only.
  *
  * @author Michael Jennings <mej@eterm.org>
- * @version $Revision$
- * @date $Date$
  */
 
 #ifndef _LIBAST_INTERNAL_H_

@@ -1,6 +1,5 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
-# $Id$
 
 broken() {
     echo

@@ -29,8 +29,6 @@
  * LibAST headers need are defined one way or the other.
  *
  * @author Michael Jennings <mej@eterm.org>
- * @version $Revision$
- * @date $Date$
  */
 
 #ifndef _LIBAST_SYSDEFS_H_
