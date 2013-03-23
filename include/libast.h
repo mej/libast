@@ -967,118 +967,6 @@ extern int re_exec();
 
 /********************************* MEM GOOP ***********************************/
 /**
- * @def MALLOC(sz)
- * Allocate @a sz bytes of memory.
- * 
- * This macro is a replacement for the libc function malloc().  It
- * allocates the specified number of bytes of memory on the heap and
- * returns a pointer to that memory location.  This macro calls libc's
- * malloc() if memory debugging is off, and spifmem_malloc() if it's
- * on.
- *
- * @param sz The size in bytes of the block of memory to allocate.
- * @return A pointer to the allocated memory.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def CALLOC(type, n)
- * Allocate enough memory for @a n objects of type @a type.
- * 
- * This macro is a replacement for the libc function calloc().  It
- * allocates a block of memory on the heap large enough to hold @a n
- * objects of type @a type (e.g., a @a type array of size @a n).  The
- * memory area is zeroed out prior to the pointer to it being
- * returned.  This macro calls libc's calloc() if memory debugging is
- * off and spifmem_calloc() if it's on. 
- *
- * @param type The type of object to be allocated (e.g., int).
- * @param n    The number of objects to be allocated.
- * @return A pointer to the allocated memory.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def REALLOC(mem, sz)
- * Resize the memory block pointed to by @a mem to @a sz bytes.
- *
- * This macro is a replacement for the libc function realloc().  It
- * changes the size of a chunk of memory previously allocated by
- * malloc() or calloc() (or, by extension, the MALLOC()/CALLOC()
- * macros) and returns a pointer to the (possibly moved) memory area.
- * This macro calls libc's realloc() if memory debugging is off and
- * spifmem_realloc() if it's on.
- *
- * @param mem The old pointer whose size will be changed.
- * @param sz  The new size, in bytes, to be allocated.
- * @return The new pointer value, which may or may not differ from the
- *         old value.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def FREE(ptr)
- * Free a previously-allocated memory block.
- *
- * This macro is a replacement for the libc function free().  It
- * returns the previously-allocated memory block pointed to by @a ptr
- * to the heap.  This macro calls libc's free() if memory debugging is
- * off and spifmem_free() if it's on.  The @a ptr parameter is assigned
- * the value of NULL after it has been freed.
- *
- * @param ptr The pointer to be freed.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def ALLOCA(sz)
- * Allocate @a sz bytes of memory on the stack.
- * 
- * This macro is a replacement for the libc function alloca().  It
- * allocates the specified number of bytes of memory on the stack and
- * returns a pointer to that memory location.  This macro calls libc's
- * alloca() if memory debugging is off, and wraps it if it's
- * on.
- *
- * @param sz The size in bytes of the block of memory to allocate.
- * @return A pointer to the allocated memory.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def STRDUP(s)
- * Duplicate a string pointer and return a pointer to the new copy.
- *
- * This macro is a replacement for the libc function strdup().  It
- * allocates a section of memory large enough to hold the string @a s
- * (including the trailing NUL character), copies the contents of @a s
- * into the new buffer, and returns a pointer to the new copy.  This
- * macro calls libc's strdup() of memory debugging is off and
- * spifmem_strdup() if it's on.
- *
- * @param s The string to duplicate.
- * @return A pointer to the newly-created copy.
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def MALLOC_DUMP()
- * Dumps a listing of all allocated pointers along with their sizes
- * and contents in both hex and ASCII.
- *
- * This macro is used to view the status of memory allocated via the
- * LibAST memory management system.  First the pointers used to track
- * allocated memory are dumped (that's what pointer #0 is); then, each
- * allocated pointer is dumped along with its size and contents, the
- * latter being displayed both in hexadecimal form and ASCII form.
- * Non-printable characters are replaced by dots ('.').  You can see
- * a sample of the output in the
- * @link mem_example.c memory management system example @endlink.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
  * @def X_CREATE_PIXMAP(d, win, w, h, depth)
  * Create an X pixmap.
  *
@@ -1194,119 +1082,79 @@ extern int re_exec();
  * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
  * @ingroup DOXGRP_MEM
  */
-/**
- * @def MALLOC_CALL_INTERVAL
- * MALLOC() call count interval.
- *
- * LibAST has the ability to count calls to MALLOC(); this defines the
- * interval for reporting the call count.  The default is 25, meaning
- * that LibAST will print the current count every 25 calls.  Note that
- * MALLOC_CALL_COUNT must be defined when compiling LibAST, in
- * addition to memory debugging, for this feature to work.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def REALLOC_CALL_INTERVAL
- * REALLOC() call count interval.
- *
- * LibAST has the ability to count calls to REALLOC(); this defines
- * the interval for reporting the call count.  The default is 25,
- * meaning that LibAST will print the current count every 25 calls.
- * Note that MALLOC_CALL_COUNT must be defined when compiling LibAST,
- * in addition to memory debugging, for this feature to work.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def CALLOC_CALL_INTERVAL
- * CALLOC() call count interval.
- *
- * LibAST has the ability to count calls to CALLOC(); this defines the
- * interval for reporting the call count.  The default is 25, meaning
- * that LibAST will print the current count every 25 calls.  Note that
- * MALLOC_CALL_COUNT must be defined when compiling LibAST, in
- * addition to memory debugging, for this feature to work.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-/**
- * @def FREE_CALL_INTERVAL
- * FREE() call count interval.
- *
- * LibAST has the ability to count calls to FREE(); this defines the
- * interval for reporting the call count.  The default is 25, meaning
- * that LibAST will print the current count every 25 calls.  Note that
- * MALLOC_CALL_COUNT must be defined when compiling LibAST, in
- * addition to memory debugging, for this feature to work.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
 #if (DEBUG >= DEBUG_MEM)
-# define MALLOC(sz)                             spifmem_malloc(__FILE__, __LINE__, (sz))
-# define CALLOC(type,n)                         spifmem_calloc(__FILE__, __LINE__, (n), (sizeof(type)))
-# define REALLOC(mem,sz)                        spifmem_realloc(#mem, __FILE__, __LINE__, (mem), (sz))
-# define FREE(ptr)                              do { spifmem_free(#ptr, __FILE__, __LINE__, (ptr)); (ptr) = NULL; } while (0)
 # ifdef LIBAST_SUPPORT_MACRO_CSE
-#  define ALLOCA(sz)                            ({ void *p = alloca(sz); p; })
-# else
-#  define ALLOCA(sz)                            alloca(sz)
-# endif
-# define STRDUP(s)                              spifmem_strdup(#s, __FILE__, __LINE__, (s))
-# define MALLOC_DUMP()                          spifmem_dump_mem_tables()
 
 /* X11 Wrappers */
-# if 0 && defined(LIBAST_SUPPORT_MACRO_CSE)
 #  define X_CREATE_PIXMAP(d, win, w, h, depth)  ({ \
-       Pixmap p = XCreatePixmap((d), (win), (w), (h), (depth)); \
-       D_MEM(("Created %ux%u pixmap 0x%08x of depth %u for window 0x%08x at %s:%lu\n", (w), (h), p, (depth), (win), __FILE__, __LINE__)); \
-       if (p == None) return p; \
-       memrec_add_var(&pixmap_rec, (spif_charptr_t) NONULL(filename), line, (void *) p, w * h * (depth / 8)); \
-       p; \
-   })
-# endif
-# define X_CREATE_PIXMAP(d, win, w, h, depth)   spifmem_x_create_pixmap(__FILE__, __LINE__, (d), (win), (w), (h), (depth))
-# define X_FREE_PIXMAP(d, p)                    spifmem_x_free_pixmap(#p, __FILE__, __LINE__, (d), (p))
-# if LIBAST_IMLIB2_SUPPORT
-#  define IMLIB_REGISTER_PIXMAP(p)              spifmem_imlib_register_pixmap(#p, __FILE__, __LINE__, (p))
-#  define IMLIB_FREE_PIXMAP(p)                  spifmem_imlib_free_pixmap(#p, __FILE__, __LINE__, (p))
-# else
-#  define IMLIB_REGISTER_PIXMAP(p)              NOP
-#  define IMLIB_FREE_PIXMAP(p)                  NOP
-# endif
-# define PIXMAP_DUMP()                          spifmem_dump_pixmap_tables()
-# define X_CREATE_GC(d, win, f, gcv)            spifmem_x_create_gc(__FILE__, __LINE__, (d), (win), (f), (gcv))
-# define X_FREE_GC(d, gc)                       spifmem_x_free_gc(#gc, __FILE__, __LINE__, (d), (gc))
-# define GC_DUMP()                              spifmem_dump_gc_tables()
-# define MALLOC_CALL_INTERVAL 25
-# define REALLOC_CALL_INTERVAL 25
-# define CALLOC_CALL_INTERVAL 25
-# define FREE_CALL_INTERVAL 25
+        Pixmap p = XCreatePixmap((d), (win), (w), (h), (depth)); \
+        D_MEM(("Created %ux%u pixmap 0x%08x of depth %u for window 0x%08x at %s:%lu\n", \
+              (w), (h), p, (depth), (win), __FILE__, __LINE__)); \
+        if (p && (DEBUG_LEVEL >= DEBUG_MEM)) spifmem_add_var(__FILE__, __LINE__, (void *) p, w * h * (depth / 8), "X Pixmap"); \
+        p; \
+    })
+#  define X_FREE_PIXMAP(d, p)                   do { \
+        D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu\n", #p, p, __FILE__, __LINE__)); \
+        if (p) { \
+            if (DEBUG_LEVEL >= DEBUG_MEM) spifmem_rem_var(#p, __FILE__, __LINE__, (p)); \
+            XFreePixmap((d), (p)); \
+        } else { \
+            D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n")); \
+        } \
+    } while (0)
+# define X_CREATE_GC(d, win, f, gcv)            ({ \
+        GC gc = XCreateGC((d), (win), (mask), (gcv)); \
+        D_MEM(("Created gc 0x%08x for window 0x%08x at %s:%lu\n", (int) gc, (win), __FILE__, __LINE__)); \
+        if (gc && (DEBUG_LEVEL >= DEBUG_MEM)) spifmem_add_var(__FILE__, __LINE__, (void *) gc, sizeof(XGCValues), "X GC"); \
+        gc; \
+    })
+# define X_FREE_GC(d, gc)                       do { \
+        D_MEM(("Freeing GC %s (0x%08x) at %s:%lu\n", #gc, gc, __FILE__, __LINE__)); \
+        if (gc) { \
+            if (DEBUG_LEVEL >= DEBUG_MEM) spifmem_rem_var(#gc, __FILE__, __LINE__, (gc)); \
+            XFreeGC((d), (gc)); \
+        } else { \
+            D_MEM(("ERROR:  Caught attempt to free NULL GC\n")); \
+        } \
+    } while (0)
+# else /* LIBAST_SUPPORT_MACRO_CSE */
+#  define X_CREATE_PIXMAP(d, win, w, h, depth)  XCreatePixmap((d), (win), (w), (h), (depth))
+#  define X_FREE_PIXMAP(d, p)                   XFreePixmap((d), (p))
+#  define X_CREATE_GC(d, win, f, gcv)           XCreateGC((d), (win), (f), (gcv))
+#  define X_FREE_GC(d, gc)                      XFreeGC((d), (gc))
+# endif /* LIBAST_SUPPORT_MACRO_CSE */
+# define IMLIB_REGISTER_PIXMAP(p)               do { \
+        D_MEM(("Registering pixmap %s (0x%08x) created by Imlib2 at %s:%lu\n", #p, p, __FILE__, __LINE__)); \
+        if (p) { \
+            if (DEBUG_LEVEL >= DEBUG_MEM) { \
+                if (!spifmem_find_var((void *) p)) { \
+                    spifmem_add_var(__FILE__, __LINE__, (void *) p, 1, "Imlib2 Pixmap"); \
+                } else { \
+                    D_MEM(("Pixmap 0x%08x already registered.\n", p)); \
+                } \
+            } \
+        } else { \
+            D_MEM(("ERROR:  Refusing to register a NULL pixmap\n")); \
+        } \
+    } while (0)
+# define IMLIB_FREE_PIXMAP(p)                   do { \
+        D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu using Imlib2\n", #p, p, __FILE__, __LINE__)); \
+        if (p) { \
+            if (DEBUG_LEVEL >= DEBUG_MEM) spifmem_rem_var(#p, __FILE__, __LINE__, (p)); \
+            imlib_free_pixmap_and_mask(p); \
+        } else { \
+            D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n")); \
+        } \
+    } while (0)
+# define SPIFMEM_DUMP()                         spifmem_dump_resources()
 #else
-# define MALLOC(sz)                             malloc(sz)
-# define CALLOC(type,n)                         calloc((n),(sizeof(type)))
-# define REALLOC(mem,sz)                        ((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem), NULL) : (NULL)))
-# define FREE(ptr)                              do { free(ptr); (ptr) = NULL; } while (0)
-# define ALLOCA(sz)                             alloca(sz)
-# define STRDUP(s)                              strdup((char *) s)
-# define MALLOC_DUMP()                          NOP
 # define X_CREATE_PIXMAP(d, win, w, h, depth)   XCreatePixmap((d), (win), (w), (h), (depth))
 # define X_FREE_PIXMAP(d, p)                    XFreePixmap((d), (p))
-# ifdef LIBAST_IMLIB2_SUPPORT
-#  define IMLIB_REGISTER_PIXMAP(p)              NOP
-#  define IMLIB_FREE_PIXMAP(p)                  imlib_free_pixmap_and_mask(p)
-# else
-#  define IMLIB_REGISTER_PIXMAP(p)              NOP
-#  define IMLIB_FREE_PIXMAP(p)                  NOP
-# endif
-# define PIXMAP_DUMP()                          NOP
 # define X_CREATE_GC(d, win, f, gcv)            XCreateGC((d), (win), (f), (gcv))
 # define X_FREE_GC(d, gc)                       XFreeGC((d), (gc))
-# define GC_DUMP()                              NOP
+# define IMLIB_REGISTER_PIXMAP(p)               NOP
+# define IMLIB_FREE_PIXMAP(p)                   imlib_free_pixmap_and_mask(p)
+# define SPIFMEM_DUMP()                         NOP
 #endif
 
 /**
@@ -1329,7 +1177,6 @@ extern int re_exec();
  * track of what pointers have been allocated, where they were
  * allocated, and how much space was requested.
  *
- * @see MALLOC(), REALLOC(), CALLOC(), FREE()
  * @ingroup DOXGRP_MEM
  */
 typedef struct spifmem_ptr_t {
@@ -1337,6 +1184,8 @@ typedef struct spifmem_ptr_t {
     void *ptr;
     /** The pointer's size, in bytes.  The pointer's size, in bytes. */
     size_t size;
+    /** The resource type.  The resource type. */
+    char *type;
     /** Filename.  The file which last (re)allocated the pointer. */
     spif_char_t file[SPIFMEM_FNAME_LEN + 1];
     /** Line number.  The line number where the pointer was last (re)allocated. */
@@ -2837,30 +2686,11 @@ extern unsigned int DEBUG_LEVEL;
 
 /* mem.c */
 extern void spifmem_init(void);
-extern void memrec_add_var(spifmem_memrec_t *, const char *, unsigned long, void *, size_t);
-extern spifmem_ptr_t *memrec_find_var(spifmem_memrec_t *, const void *);
-extern void memrec_rem_var(spifmem_memrec_t *, const char *, const char *, unsigned long, const void *);
-extern void memrec_chg_var(spifmem_memrec_t *, const char *, const char *, unsigned long, const void *, void *, size_t);
-extern void memrec_dump_pointers(spifmem_memrec_t *);
-extern void memrec_dump_resources(spifmem_memrec_t *);
-extern void *spifmem_malloc(const char *, unsigned long, size_t);
-extern void *spifmem_realloc(const char *, const char *, unsigned long, void *, size_t);
-extern void *spifmem_calloc(const char *, unsigned long, size_t, size_t);
-extern void spifmem_free(const char *, const char *, unsigned long, void *);
-extern char *spifmem_strdup(const char *, const char *, unsigned long, const char *);
-extern void spifmem_dump_mem_tables(void);
-#if LIBAST_X11_SUPPORT
-extern Pixmap spifmem_x_create_pixmap(const char *, unsigned long, Display *, Drawable, unsigned int, unsigned int, unsigned int);
-extern void spifmem_x_free_pixmap(const char *, const char *, unsigned long, Display *, Pixmap);
-# if LIBAST_IMLIB2_SUPPORT
-extern void spifmem_imlib_register_pixmap(const char * var, const char * filename, unsigned long line, Pixmap p);
-extern void spifmem_imlib_free_pixmap(const char * var, const char * filename, unsigned long line, Pixmap p);
-# endif
-extern void spifmem_dump_pixmap_tables(void);
-extern GC spifmem_x_create_gc(const char *, unsigned long, Display *, Drawable, unsigned long, XGCValues *);
-extern void spifmem_x_free_gc(const char *, const char *, unsigned long, Display *, GC);
-extern void spifmem_dump_gc_tables(void);
-#endif
+extern void spifmem_add_var(const char *, unsigned long, void *, size_t, char *);
+extern spifmem_ptr_t *spifmem_find_var(const void *);
+extern void spifmem_rem_var(const char *, const char *, unsigned long, const void *);
+extern void spifmem_chg_var(const char *, const char *, unsigned long, const void *, void *, size_t);
+extern void spifmem_dump_resources(void);
 extern void spiftool_free_array(void *, size_t);
 
 /* file.c */
@@ -3015,5 +2845,16 @@ static void (*fatal_error)(const char *, ...) = libast_fatal_error;
 # define version_compare(a, b)                                   spiftool_version_compare((a), (b))
 
 #endif /* LIBAST_COMPAT_05_API */
+
+#if LIBAST_COMPAT_07_API
+# define MALLOC(sz)                             malloc(sz)
+# define CALLOC(type,n)                         calloc((n),(sizeof(type)))
+# define REALLOC(mem,sz)                        ((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem), NULL) : (NULL)))
+# define FREE(ptr)                              do { free(ptr); (ptr) = NULL; } while (0)
+# define STRDUP(s)                              strdup((char *) s)
+# define MALLOC_DUMP()                          NOP
+# define PIXMAP_DUMP()                          SPIFMEM_DUMP()
+# define GC_DUMP()                              SPIFMEM_DUMP()
+#endif /* LIBAST_COMPAT_07_API */
 
 #endif /* _LIBAST_H_ */

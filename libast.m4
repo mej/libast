@@ -179,74 +179,14 @@ dnl#
 dnl# LibAST macro for X11 support
 dnl#
 AC_DEFUN([AST_X11_SUPPORT], [
-    AC_PATH_XTRA
-    if test ! -z "$X_CFLAGS"; then
-        if test -z "$CPPFLAGS"; then
-            CPPFLAGS="$X_CFLAGS"
-        else
-            CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-        fi
-    fi
-    if test ! -z "$X_LIBS"; then
-        if test -z "$LDFLAGS"; then
-            LDFLAGS="$X_LIBS"
-        else
-            LDFLAGS="$LDFLAGS $X_LIBS"
-        fi
-    fi
-    LIBAST_X11_SUPPORT=""
-    if test "x$no_x" != "xyes"; then
-        AC_CHECK_LIB(X11, XOpenDisplay, [
-                         LIBAST_X11_SUPPORT="X11"
-                         GRLIBS="-lX11"
-                         AC_DEFINE([LIBAST_X11_SUPPORT], [1], [Define for X11 support.])
-                     ])
-    fi
-    AC_SUBST(LIBAST_X11_SUPPORT)
+    :
 ])
 
 dnl#
 dnl# LibAST macro for Imlib2 support
 dnl#
 AC_DEFUN([AST_IMLIB2_SUPPORT], [
-    AC_ARG_WITH(imlib,
-    [  --with-imlib[=DIR]        compile with Imlib2 support (default)],
-    [
-        if test "$withval" != "no"; then 
-            if test "$withval" != "yes"; then
-                CPPFLAGS="$CPPFLAGS -I${withval}/include"
-                LDFLAGS="$LDFLAGS -L${withval}/lib"
-            fi
-            USE_IMLIB=1
-        else
-            USE_IMLIB=0
-        fi
-    ], [
-        USE_IMLIB=1
-    ])
-    LIBAST_IMLIB2_SUPPORT=""
-    if test $USE_IMLIB -eq 1 ; then
-        AC_CHECK_PROG(IMLIB2_CONFIG, imlib2-config, imlib2-config)
-            if test "x$IMLIB2_CONFIG" != "x"; then
-                GRLIBS="`$IMLIB2_CONFIG --libs`"
-                CFLAGS="$CFLAGS `$IMLIB2_CONFIG --cflags`"
-                AC_DEFINE([LIBAST_IMLIB2_SUPPORT], [1], [Define for Imlib2 support.])
-                LIBAST_IMLIB2_SUPPORT="Imlib2"
-            else
-                AC_CHECK_LIB(m, pow, LIBS="-lm $LIBS")
-                AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS")
-                AC_CHECK_LIB(freetype, FT_Init_FreeType, GRLIBS="-lfreetype $GRLIBS", , $GRLIBS)
-                AC_CHECK_LIB(Imlib2, imlib_create_image, [
-                                GRLIBS="-lImlib2 $GRLIBS"
-                                AC_DEFINE([LIBAST_IMLIB2_SUPPORT], [1], [Define for Imlib2 support.])
-                                LIBAST_IMLIB2_SUPPORT="Imlib2"
-                     ], [
-                         AC_WARN(*** Imlib2 support has been disabled because Imlib2 ***)
-                         AC_WARN(*** was not found or could not be linked.           ***)
-                     ], $GRLIBS)
-            fi
-    fi
-    AC_SUBST(LIBAST_IMLIB2_SUPPORT)
+    :
 ])
 
 dnl#

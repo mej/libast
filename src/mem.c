@@ -36,62 +36,15 @@
 
 #include "libast_internal.h"
 
-#if MALLOC_CALL_COUNT
-/*@{*/
 /**
- * @name Memory Management Call Tracking
- * Count calls to memory management functions.
+ * Allocated resources.
  *
- * This group of variables is used to count calls to the memory
- * management functions.  Call counting is controlled by the
- * #MALLOC_CALL_COUNT symbol, and is off by default.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink
- * @ingroup DOXGRP_MEM
- */
-
-/** Count calls to MALLOC().  Count calls to MALLOC(). */
-static int malloc_count = 0;
-/** Count calls to CALLOC().  Count calls to CALLOC(). */
-static int calloc_count = 0;
-/** Count calls to REALLOC().  Count calls to REALLOC(). */
-static int realloc_count = 0;
-/** Count calls to FREE().  Count calls to FREE(). */
-static int free_count = 0;
-/*@}*/
-#endif
-
-/**
- * Allocated pointers.
- *
- * This structure keeps track of the pointer array which represents
- * pointers allocated via the memory management interface.
+ * This structure keeps track of generic resources.
  *
  * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, spifmem_memrec_t_struct
  * @ingroup DOXGRP_MEM
  */
-static spifmem_memrec_t malloc_rec;
-/**
- * Allocated pixmaps.
- *
- * This structure keeps track of the pixmap array which represents
- * pixmaps allocated via the memory management interface.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, spifmem_memrec_t_struct
- * @ingroup DOXGRP_MEM
- */
-static spifmem_memrec_t pixmap_rec;
-/**
- * Allocated GC's.
- *
- * This structure keeps track of the GC array which represents
- * X11 Graphics Context objects, or GC's, allocated via the memory
- * management interface.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, spifmem_memrec_t_struct
- * @ingroup DOXGRP_MEM
- */
-static spifmem_memrec_t gc_rec;
+static spifmem_memrec_t resource_rec;
 
 /**
  * Initialize memory management system.
@@ -107,55 +60,46 @@ void
 spifmem_init(void)
 {
     D_MEM(("Constructing memory allocation records\n"));
-    malloc_rec.ptrs = (spifmem_ptr_t *) malloc(sizeof(spifmem_ptr_t));
-    pixmap_rec.ptrs = (spifmem_ptr_t *) malloc(sizeof(spifmem_ptr_t));
-    gc_rec.ptrs = (spifmem_ptr_t *) malloc(sizeof(spifmem_ptr_t));
+    resource_rec.ptrs = (spifmem_ptr_t *) malloc(sizeof(spifmem_ptr_t));
 }
 
 /**
- * Add a variable to a record set.
+ * Add a resource to be tracked.
  *
- * This is the static, internal-use-only function that does the actual
- * work of recording information on a variable to be tracked.  This
- * information includes file and line number information and is stored
- * as a #spifmem_ptr_t.
- *
- * @param memrec   Address of the #spifmem_memrec_t we're adding to.
  * @param filename The filename where the variable was allocated.
  * @param line     The line number of @a filename where the variable
  *                 was allocated.
  * @param ptr      The allocated variable.
- * @param size     The number of bytes requested.
+ * @param size     The size of the resource in bytes.
+ * @param type     The type of resource being tracked.
  *
  * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, MALLOC(), libast_malloc()
  * @ingroup DOXGRP_MEM
  */
 void
-memrec_add_var(spifmem_memrec_t *memrec, const char *filename, unsigned long line, void *ptr, size_t size)
+spifmem_add_var(const char *filename, unsigned long line, void *ptr, size_t size, char *type)
 {
     register spifmem_ptr_t *p;
 
-    ASSERT(memrec != NULL);
-    memrec->cnt++;
-    if (!(memrec->ptrs = (spifmem_ptr_t *)realloc(memrec->ptrs, sizeof(spifmem_ptr_t) * memrec->cnt))) {
+    resource_rec.cnt++;
+    if (!(resource_rec.ptrs = (spifmem_ptr_t *)realloc(resource_rec.ptrs, sizeof(spifmem_ptr_t) * resource_rec.cnt))) {
         D_MEM(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
     }
-    p = memrec->ptrs + memrec->cnt - 1;
+    p = resource_rec.ptrs + resource_rec.cnt - 1;
     D_MEM(("Adding variable (%10p, %lu bytes) from %s:%lu.\n", ptr, size, filename, line));
-    D_MEM(("Storing as pointer #%lu at %10p (from %10p).\n", memrec->cnt, p, memrec->ptrs));
+    D_MEM(("Storing as pointer #%lu at %10p (from %10p).\n", resource_rec.cnt, p, resource_rec.ptrs));
     p->ptr = ptr;
     p->size = size;
     spiftool_safe_strncpy(p->file, (const spif_charptr_t) filename, sizeof(p->file));
     p->line = line;
+    p->type = type;
 }
 
 /**
- * Find a variable within a record set.
+ * Find a variable within the list of tracked resources.
  *
- * This function searches through the pointer list of the specified
- * @a memrec object for a given pointer.
+ * This function searches through the resource list for a given resource ID.
  *
- * @param memrec Address of the #spifmem_memrec_t we're searching.
  * @param ptr    The value of the requested pointer.
  * @return       A pointer to the #spifmem_ptr_t object within @a memrec
  *               that matches @a ptr, or NULL if not found.
@@ -164,17 +108,16 @@ memrec_add_var(spifmem_memrec_t *memrec, const char *filename, unsigned long lin
  * @ingroup DOXGRP_MEM
  */
 spifmem_ptr_t *
-memrec_find_var(spifmem_memrec_t *memrec, const void *ptr)
+spifmem_find_var(const void *ptr)
 {
     register spifmem_ptr_t *p;
     register unsigned long i;
 
-    ASSERT_RVAL(memrec != NULL, NULL);
     REQUIRE_RVAL(ptr != NULL, NULL);
 
-    for (i = 0, p = memrec->ptrs; i < memrec->cnt; i++, p++) {
+    for (i = 0, p = resource_rec.ptrs; i < resource_rec.cnt; i++, p++) {
         if (p->ptr == ptr) {
-            D_MEM(("Found pointer #%lu stored at %10p (from %10p)\n", i + 1, p, memrec->ptrs));
+            D_MEM(("Found pointer #%lu stored at %10p (from %10p)\n", i + 1, p, resource_rec.ptrs));
             return p;
         }
     }
@@ -182,12 +125,8 @@ memrec_find_var(spifmem_memrec_t *memrec, const void *ptr)
 }
 
 /**
- * Remove a variable from a record set.
+ * Remove a variable from the list of tracked resources.
  *
- * This is the static, internal-use-only function that does the actual
- * work of freeing recorded information for a deleted pointer.
- *
- * @param memrec   Address of the #spifmem_memrec_t we're removing from.
  * @param var      The variable name being freed (for diagnostic
  *                 purposes only).
  * @param filename The filename where the variable was freed.
@@ -199,34 +138,29 @@ memrec_find_var(spifmem_memrec_t *memrec, const void *ptr)
  * @ingroup DOXGRP_MEM
  */
 void
-memrec_rem_var(spifmem_memrec_t *memrec, const char *var, const char *filename, unsigned long line, const void *ptr)
+spifmem_rem_var(const char *var, const char *filename, unsigned long line, const void *ptr)
 {
     register spifmem_ptr_t *p;
 
-    ASSERT(memrec != NULL);
     USE_VAR(var);
     USE_VAR(filename);
     USE_VAR(line);
 
-    if (!(p = memrec_find_var(memrec, ptr))) {
-        D_MEM(("ERROR:  File %s, line %d attempted to free variable %s (%10p) which was not allocated with MALLOC/REALLOC\n",
+    if (!(p = spifmem_find_var(ptr))) {
+        D_MEM(("ERROR:  File %s, line %d attempted to free resource %s (%10p) which was not registered.\n",
                filename, line, var, ptr));
         return;
     }
     D_MEM(("Removing variable %s (%10p) of size %lu\n", var, ptr, p->size));
-    if ((--memrec->cnt) > 0) {
-        memmove(p, p + 1, sizeof(spifmem_ptr_t) * (memrec->cnt - (p - memrec->ptrs)));
-        memrec->ptrs = (spifmem_ptr_t *) realloc(memrec->ptrs, sizeof(spifmem_ptr_t) * memrec->cnt);
+    if ((--resource_rec.cnt) > 0) {
+        memmove(p, p + 1, sizeof(spifmem_ptr_t) * (resource_rec.cnt - (p - resource_rec.ptrs)));
+        resource_rec.ptrs = (spifmem_ptr_t *) realloc(resource_rec.ptrs, sizeof(spifmem_ptr_t) * resource_rec.cnt);
     }
 }
 
 /**
- * Resize a variable in a record set.
+ * Resize a tracked resource.
  *
- * This is the static, internal-use-only function that does the actual
- * work of altering information on a tracked variable.
- *
- * @param memrec   Address of the #spifmem_memrec_t we're modifying.
  * @param var      The variable name being resized (for diagnostic
  *                 purposes only).
  * @param filename The filename where the variable was resized.
@@ -240,611 +174,56 @@ memrec_rem_var(spifmem_memrec_t *memrec, const char *var, const char *filename, 
  * @ingroup DOXGRP_MEM
  */
 void
-memrec_chg_var(spifmem_memrec_t *memrec, const char *var, const char *filename, unsigned long line, const void *oldp, void *newp, size_t size)
+spifmem_chg_var(const char *var, const char *filename, unsigned long line, const void *oldp, void *newp, size_t size)
 {
     register spifmem_ptr_t *p;
 
-    ASSERT(memrec != NULL);
     USE_VAR(var);
 
-    if (!(p = memrec_find_var(memrec, oldp))) {
-        D_MEM(("ERROR:  File %s, line %d attempted to realloc variable %s (%10p) which was not allocated with MALLOC/REALLOC\n", filename,
+    if (!(p = spifmem_find_var(oldp))) {
+        D_MEM(("ERROR:  File %s, line %d attempted to realloc untracked resource %s (%10p).\n", filename,
                line, var, oldp));
         return;
     }
     D_MEM(("Changing variable %s (%10p, %lu -> %10p, %lu)\n", var, oldp, p->size, newp, size));
     p->ptr = newp;
     p->size = size;
-    spiftool_safe_strncpy(p->file, (const spif_charptr_t) filename, sizeof(p->file));
+    spiftool_safe_strncpy(p->file, filename, sizeof(p->file));
     p->line = line;
-}
-
-/**
- * Dump listing of tracked pointers.
- *
- * This function dumps a listing of all pointers in @a memrec along
- * with the filename, line number, address, size, and contents for
- * each.  Contents are displayed in both hex and ASCII, the latter
- * having non-printable characters replaced with periods ('.').
- *
- * @param memrec Address of the #spifmem_memrec_t we're dumping.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, MALLOC_DUMP(), libast_dump_mem_tables()
- * @ingroup DOXGRP_MEM
- */
-void
-memrec_dump_pointers(spifmem_memrec_t *memrec)
-{
-    register spifmem_ptr_t *p;
-    unsigned long i, j, k, l, total = 0;
-    unsigned long len;
-    spif_char_t buff[9];
-
-    ASSERT(memrec != NULL);
-    fprintf(LIBAST_DEBUG_FD, "PTR:  %lu pointers stored.\n", (unsigned long) memrec->cnt);
-    fprintf(LIBAST_DEBUG_FD,
-            "PTR:   Pointer |       Filename       |  Line  |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  \n");
-    fprintf(LIBAST_DEBUG_FD,
-            "PTR:  ---------+----------------------+--------+----------+--------+---------+-------------------------+---------\n");
-    fflush(LIBAST_DEBUG_FD);
-    len = sizeof(spifmem_ptr_t) * memrec->cnt;
-    memset(buff, 0, sizeof(buff));
-
-    /* First, dump the contents of the memrec->ptrs[] array. */
-    for (p = memrec->ptrs, j = 0; j < len; j += 8) {
-        fprintf(LIBAST_DEBUG_FD, "PTR:   %07lu | %20s | %6lu | %10p | %06lu | %07x | ",
-                (unsigned long) 0, "", (unsigned long) 0,
-                (spif_ptr_t) memrec->ptrs,
-                (unsigned long) (sizeof(spifmem_ptr_t) * memrec->cnt), (unsigned int) j);
-        /* l is the number of characters we're going to output */
-        l = ((len - j < 8) ? (len - j) : (8));
-        /* Copy l bytes (up to 8) from memrec->ptrs[] (p) to buffer */
-        memcpy(buff, ((char *) p) + j, l);
-        buff[l] = 0;
-        for (k = 0; k < l; k++) {
-            fprintf(LIBAST_DEBUG_FD, "%02x ", buff[k]);
-        }
-        /* If we printed less than 8 bytes worth, pad with 3 spaces per byte */
-        for (; k < 8; k++) {
-            fprintf(LIBAST_DEBUG_FD, "   ");
-        }
-        /* Finally, print the printable ASCII string for those l bytes */
-        fprintf(LIBAST_DEBUG_FD, "| %-8s\n", spiftool_safe_str((char *) buff, l));
-        /* Flush after every line in case we crash */
-        fflush(LIBAST_DEBUG_FD);
-    }
-
-    /* Now print out each pointer and its contents. */
-    for (i = 0; i < memrec->cnt; p++, i++) {
-        /* Add this pointer's size to our total */
-        total += p->size;
-        for (j = 0; j < p->size; j += 8) {
-            fprintf(LIBAST_DEBUG_FD, "PTR:   %07lu | %20s | %6lu | %10p | %06lu | %07x | ",
-                    i + 1, NONULL(p->file), (unsigned long) p->line,
-                    p->ptr, (unsigned long) p->size, (unsigned) j);
-            /* l is the number of characters we're going to output */
-            l = ((p->size - j < 8) ? (p->size - j) : (8));
-            /* Copy l bytes (up to 8) from p->ptr to buffer */
-            memcpy(buff, ((char *) p->ptr) + j, l);
-            buff[l] = 0;
-            for (k = 0; k < l; k++) {
-                fprintf(LIBAST_DEBUG_FD, "%02x ", buff[k]);
-            }
-            /* If we printed less than 8 bytes worth, pad with 3 spaces per byte */
-            for (; k < 8; k++) {
-                fprintf(LIBAST_DEBUG_FD, "   ");
-            }
-            /* Finally, print the printable ASCII string for those l bytes */
-            fprintf(LIBAST_DEBUG_FD, "| %-8s\n", spiftool_safe_str(buff, l));
-            /* Flush after every line in case we crash */
-            fflush(LIBAST_DEBUG_FD);
-        }
-    }
-    fprintf(LIBAST_DEBUG_FD, "PTR:  Total allocated memory: %10lu bytes\n", total);
-    fflush(LIBAST_DEBUG_FD);
 }
 
 /**
  * Dump listing of tracked resources.
  *
- * This function is very similar to memrec_dump_pointers() but is
- * intended for use with non-pointer data.
- *
- * @param memrec Address of the #spifmem_memrec_t we're dumping.
- *
  * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, MALLOC_DUMP(), libast_dump_mem_tables(),
- *      memrec_dump_pointers()
+ *      spifmem_dump_pointers()
  * @ingroup DOXGRP_MEM
  */
 void
-memrec_dump_resources(spifmem_memrec_t *memrec)
+spifmem_dump_resources(void)
 {
     register spifmem_ptr_t *p;
     unsigned long i, total;
     unsigned long len;
 
-    ASSERT(memrec != NULL);
-    len = memrec->cnt;
+    len = resource_rec.cnt;
     fprintf(LIBAST_DEBUG_FD, "RES:  %lu resources stored.\n",
-            (unsigned long) memrec->cnt);
-    fprintf(LIBAST_DEBUG_FD, "RES:   Index | Resource ID |       Filename       |  Line  |  Size  \n");
-    fprintf(LIBAST_DEBUG_FD, "RES:  -------+-------------+----------------------+--------+--------\n");
+            (unsigned long) resource_rec.cnt);
+    fprintf(LIBAST_DEBUG_FD, "RES:   Index | Resource ID |       Filename       |  Line  |  Size  |   Type\n");
+    fprintf(LIBAST_DEBUG_FD, "RES:  -------+-------------+----------------------+--------+--------+----------\n");
     fflush(LIBAST_DEBUG_FD);
 
-    for (p = memrec->ptrs, i = 0, total = 0; i < len; i++, p++) {
+    for (p = resource_rec.ptrs, i = 0, total = 0; i < len; i++, p++) {
         total += p->size;
-        fprintf(LIBAST_DEBUG_FD, "RES:   %5lu |  0x%08lx | %20s | %6lu | %6lu\n",
-                i, (unsigned long) p->ptr, NONULL(p->file),
-                (unsigned long) p->line,
-                (unsigned long) p->size);
+        fprintf(LIBAST_DEBUG_FD, "RES:   %5lu |  0x%08lx | %20s | %6lu | %6lu | %-8s\n",
+                i, (unsigned long) p->ptr, NONULL(p->file), (unsigned long) p->line,
+                (unsigned long) p->size, p->type);
         /* Flush after every line in case we crash */
         fflush(LIBAST_DEBUG_FD);
     }
     fprintf(LIBAST_DEBUG_FD, "RES:  Total size: %lu bytes\n", (unsigned long) total);
     fflush(LIBAST_DEBUG_FD);
 }
-
-/******************** MEMORY ALLOCATION INTERFACE ********************/
-
-/**
- * LibAST implementation of malloc().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * MALLOC() macro are routed here.  The macro allows filename and line
- * number information to be provided thanks to the __FILE__ and
- * __LINE__ symbols pre-defined by cpp.
- *
- * @param filename The filename where the variable is being
- *                 allocated.
- * @param line     The line number of @a filename where the variable
- *                 is being allocated.
- * @param size     The requested size in bytes (as passed to MALLOC()).
- * @return         A pointer to the newly-allocated memory.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, MALLOC()
- * @ingroup DOXGRP_MEM
- */
-void *
-spifmem_malloc(const char *filename, unsigned long line, size_t size)
-{
-    void *temp;
-
-#if MALLOC_CALL_COUNT
-    ++malloc_count;
-    if (!(malloc_count % MALLOC_CALL_INTERVAL)) {
-        fprintf(LIBAST_DEBUG_FD, "Calls to malloc(): %d\n", malloc_count);
-    }
-#endif
-
-    D_MEM(("%lu bytes requested at %s:%lu\n", size, NONULL(filename), line));
-
-    temp = (void *) malloc(size);
-    ASSERT_RVAL(!SPIF_PTR_ISNULL(temp), (spif_ptr_t) NULL);
-    if (DEBUG_LEVEL >= DEBUG_MEM) {
-        memrec_add_var(&malloc_rec, NONULL(filename), line, temp, size);
-    }
-    return (temp);
-}
-
-/**
- * LibAST implementation of realloc().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * REALLOC() macro are routed here.  The macro allows variable name,
- * filename, and line number information to be provided.
- *
- * @param var      The variable name being resized.
- * @param filename The filename where the variable is being
- *                 reallocated.
- * @param line     The line number of @a filename where the variable
- *                 is being reallocated.
- * @param ptr      The old value of the pointer being resized.
- * @param size     The new requested size in bytes (as passed to
- *                 REALLOC()). 
- * @return         The new value (possibly moved) of the pointer.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, REALLOC()
- * @ingroup DOXGRP_MEM
- */
-void *
-spifmem_realloc(const char *var, const char *filename, unsigned long line, void *ptr, size_t size)
-{
-    void *temp;
-
-#if MALLOC_CALL_COUNT
-    ++realloc_count;
-    if (!(realloc_count % REALLOC_CALL_INTERVAL)) {
-        D_MEM(("Calls to realloc(): %d\n", realloc_count));
-    }
-#endif
-
-    D_MEM(("Variable %s (%10p -> %lu) at %s:%lu\n", var, ptr, (unsigned long) size, NONULL(filename), line));
-    if (!ptr) {
-        temp = (void *) spifmem_malloc(filename, line, size);
-    } else if (size == 0) {
-        spifmem_free(var, filename, line, ptr);
-        temp = NULL;
-    } else {
-        temp = (void *) realloc(ptr, size);
-        ASSERT_RVAL(!SPIF_PTR_ISNULL(temp), (spif_ptr_t) NULL);
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            memrec_chg_var(&malloc_rec, var, NONULL(filename), line, ptr, temp, size);
-        }
-    }
-    return (temp);
-}
-
-/**
- * LibAST implementation of calloc().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * CALLOC() macro are routed here.  The macro allows filename and line
- * number information to be provided thanks to the __FILE__ and
- * __LINE__ symbols pre-defined by cpp.
- *
- * @param filename The filename where the variable is being
- *                 allocated.
- * @param line     The line number of @a filename where the variable
- *                 is being allocated.
- * @param count    The number of objects being allocated.
- * @param size     The size in bytes of each object (as passed to
- *                 CALLOC()).
- * @return         A pointer to the newly-allocated, zeroed memory.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, CALLOC()
- * @ingroup DOXGRP_MEM
- */
-void *
-spifmem_calloc(const char *filename, unsigned long line, size_t count, size_t size)
-{
-    void *temp;
-    size_t total_size;
-
-    total_size = size * count;
-#if MALLOC_CALL_COUNT
-    ++calloc_count;
-    if (!(calloc_count % CALLOC_CALL_INTERVAL)) {
-        fprintf(LIBAST_DEBUG_FD, "Calls to calloc(): %d\n", calloc_count);
-    }
-#endif
-
-    D_MEM(("%lu units of %lu bytes each (%lu bytes total) requested at %s:%lu\n",
-           count, size, total_size, NONULL(filename), line));
-    temp = (void *) calloc(count, size);
-    ASSERT_RVAL(!SPIF_PTR_ISNULL(temp), (spif_ptr_t) NULL);
-    if (DEBUG_LEVEL >= DEBUG_MEM) {
-        memrec_add_var(&malloc_rec, NONULL(filename), line, temp, total_size);
-    }
-    return (temp);
-}
-
-/**
- * LibAST implementation of free().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * FREE() macro are routed here.  The macro allows variable name,
- * filename, and line number information to be provided.
- *
- * @param var      The variable name being freed.
- * @param filename The filename where the variable is being freed.
- * @param line     The line number of @a filename where the variable
- *                 is being freed.
- * @param ptr      The pointer being freed (as passed to FREE()).
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, FREE()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_free(const char *var, const char *filename, unsigned long line, void *ptr)
-{
-#if MALLOC_CALL_COUNT
-    ++free_count;
-    if (!(free_count % FREE_CALL_INTERVAL)) {
-        fprintf(LIBAST_DEBUG_FD, "Calls to free(): %d\n", free_count);
-    }
-#endif
-
-    D_MEM(("Variable %s (%10p) at %s:%lu\n", var, ptr, NONULL(filename), line));
-    if (ptr) {
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            memrec_rem_var(&malloc_rec, var, NONULL(filename), line, ptr);
-        }
-        free(ptr);
-    } else {
-        D_MEM(("ERROR:  Caught attempt to free NULL pointer\n"));
-    }
-}
-
-/**
- * LibAST implementation of strdup().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * STRDUP() macro are routed here.  The macro allows variable name,
- * filename, and line number information to be provided.
- *
- * @param var      The variable name being duplicated.
- * @param filename The filename where the variable is being duplicated.
- * @param line     The line number of @a filename where the variable
- *                 is being duplicated.
- * @param str      The string being duplicated (as passed to STRDUP()).
- * @return         A pointer to a newly-allocated copy of @a str.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, STRDUP()
- * @ingroup DOXGRP_MEM
- */
-char *
-spifmem_strdup(const char *var, const char *filename, unsigned long line, const char *str)
-{
-    register char *newstr;
-    register size_t len;
-
-    ASSERT_RVAL(!SPIF_PTR_ISNULL(str), (char *) NULL);
-    USE_VAR(var);
-    D_MEM(("Variable %s (%10p) at %s:%lu\n", var, str, NONULL(filename), line));
-
-    len = strlen((char *) str) + 1;      /* Copy NUL byte also */
-    newstr = (char *) spifmem_malloc(NONULL(filename), line, len);
-    ASSERT_RVAL(!SPIF_PTR_ISNULL(newstr), (spif_ptr_t) NULL);
-    strcpy((char *) newstr, (char *) str);
-    return (newstr);
-}
-
-/**
- * Dump listing of tracked pointers.
- *
- * This function simply calls memrec_dump_pointers() and passes in the
- * address of the #malloc_rec variable.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, MALLOC_DUMP(), memrec_dump_pointers()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_dump_mem_tables(void)
-{
-    fprintf(LIBAST_DEBUG_FD, "Dumping memory allocation table:\n");
-    memrec_dump_pointers(&malloc_rec);
-}
-
-#if LIBAST_X11_SUPPORT
-
-/******************** PIXMAP ALLOCATION INTERFACE ********************/
-
-/**
- * LibAST implementation of XCreatePixmap().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * X_CREATE_PIXMAP() macro are routed here.  The macro allows filename
- * and line number information to be provided thanks to the __FILE__
- * and __LINE__ symbols pre-defined by cpp.
- *
- * @param filename The filename where the pixmap is being created.
- * @param line     The line number of @a filename where the pixmap is
- *                 being created.
- * @param d        The Display for the new pixmap.
- * @param win      The Drawable for the new pixmap.
- * @param w        Width of the pixmap, in pixels.
- * @param h        Height of the pixmap, in pixels.
- * @param depth    The color depth for the new pixmap.
- * @return         A newly-created Pixmap.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, X_CREATE_PIXMAP()
- * @ingroup DOXGRP_MEM
- */
-Pixmap
-spifmem_x_create_pixmap(const char *filename, unsigned long line, Display * d, Drawable win, unsigned int w, unsigned int h,
-                       unsigned int depth)
-{
-    Pixmap p;
-
-    p = XCreatePixmap(d, win, w, h, depth);
-    D_MEM(("Created %ux%u pixmap 0x%08x of depth %u for window 0x%08x at %s:%lu\n", w, h, p, depth, win, NONULL(filename), line));
-    ASSERT_RVAL(p != None, None);
-    if (DEBUG_LEVEL >= DEBUG_MEM) {
-        memrec_add_var(&pixmap_rec, NONULL(filename), line, (void *) p, w * h * (depth / 8));
-    }
-    return (p);
-}
-
-/**
- * LibAST implementation of XFreePixmap().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * X_FREE_PIXMAP() macro are routed here.  The macro allows variable
- * name, filename, and line number information to be provided.
- *
- * @param var      The variable name of the pixmap being freed.
- * @param filename The filename where the pixmap is being freed.
- * @param line     The line number of @a filename where the pixmap is
- *                 being freed.
- * @param d        The Display for the pixmap.
- * @param p        The Pixmap to be freed.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, X_FREE_PIXMAP()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_x_free_pixmap(const char *var, const char *filename, unsigned long line, Display * d, Pixmap p)
-{
-    D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu\n", var, p, NONULL(filename), line));
-    if (p) {
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            memrec_rem_var(&pixmap_rec, var, NONULL(filename), line, (void *) p);
-        }
-        XFreePixmap(d, p);
-    } else {
-        D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n"));
-    }
-}
-
-# if LIBAST_IMLIB2_SUPPORT
-/**
- * Register a pixmap for tracking.
- *
- * Imlib has its own mechanism for creating pixmaps internally.  In
- * order to keep track of these pixmaps, they must be registered with
- * LibAST using this function (via the IMLIB_REGISTER_PIXMAP() macro).
- *
- * @param var      The variable name of the pixmap being registered.
- * @param filename The filename where the pixmap is being registered.
- * @param line     The line number of @a filename where the pixmap is
- *                 being registered.
- * @param p        The Pixmap being registered.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, IMLIB_REGISTER_PIXMAP()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_imlib_register_pixmap(const char *var, const char *filename, unsigned long line, Pixmap p)
-{
-    USE_VAR(var);
-    D_MEM(("Registering pixmap %s (0x%08x) created by Imlib2 at %s:%lu\n", var, p, NONULL(filename), line));
-    if (p) {
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            if (!memrec_find_var(&pixmap_rec, (void *) p)) {
-                memrec_add_var(&pixmap_rec, NONULL(filename), line, (void *) p, 1);
-            } else {
-                D_MEM(("Pixmap 0x%08x already registered.\n"));
-            }
-        }
-    } else {
-        D_MEM(("ERROR:  Refusing to register a NULL pixmap\n"));
-    }
-}
-
-/**
- * Free a pixmap created by Imlib.
- *
- * Imlib has its own mechanism for freeing pixmaps, and their
- * associated mask (if any), internally.  All pixmaps created by Imlib
- * must also be freed by Imlib.  It is safe, albeit a bit slower, to
- * free all pixmaps via Imlib, regardless of how they were created.
- *
- * @param var      The variable name of the pixmap being freed.
- * @param filename The filename where the pixmap is being freed.
- * @param line     The line number of @a filename where the pixmap is
- *                 being freed.
- * @param p        The Pixmap being freed.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, IMLIB_FREE_PIXMAP()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_imlib_free_pixmap(const char *var, const char *filename, unsigned long line, Pixmap p)
-{
-    D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu using Imlib2\n", var, p, NONULL(filename), line));
-    if (p) {
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            memrec_rem_var(&pixmap_rec, var, NONULL(filename), line, (void *) p);
-        }
-        imlib_free_pixmap_and_mask(p);
-    } else {
-        D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n"));
-    }
-}
-# endif
-
-/**
- * Dump listing of tracked pixmaps.
- *
- * This function simply calls memrec_dump_resources() and passes in
- * the address of the #pixmap_rec variable.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, PIXMAP_DUMP(), memrec_dump_resources()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_dump_pixmap_tables(void)
-{
-    fprintf(LIBAST_DEBUG_FD, "Dumping X11 Pixmap allocation table:\n");
-    memrec_dump_resources(&pixmap_rec);
-}
-
-
-
-/********************** GC ALLOCATION INTERFACE **********************/
-
-/**
- * LibAST implementation of XCreateGC().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * X_CREATE_GC() macro are routed here.  The macro allows filename
- * and line number information to be provided thanks to the __FILE__
- * and __LINE__ symbols pre-defined by cpp.
- *
- * @param filename The filename where the GC is being created.
- * @param line     The line number of @a filename where the GC is
- *                 being created.
- * @param d        The Display for the new GC.
- * @param win      The Drawable for the new GC.
- * @param mask     Bitwise OR of zero or more GC flags.
- * @param gcv      Pointer to XGCValues structure.
- * @return         A newly-created GC.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, X_CREATE_GC()
- * @ingroup DOXGRP_MEM
- */
-GC
-spifmem_x_create_gc(const char *filename, unsigned long line, Display * d, Drawable win, unsigned long mask, XGCValues * gcv)
-{
-    GC gc;
-
-    D_MEM(("Creating gc for window 0x%08x at %s:%lu\n", win, NONULL(filename), line));
-
-    gc = XCreateGC(d, win, mask, gcv);
-    ASSERT_RVAL(gc != None, None);
-    if (DEBUG_LEVEL >= DEBUG_MEM) {
-        memrec_add_var(&gc_rec, NONULL(filename), line, (void *) gc, sizeof(XGCValues));
-    }
-    return (gc);
-}
-
-/**
- * LibAST implementation of XFreeGC().
- *
- * When memory debugging is active (via #DEBUG_MEM), all calls to the
- * X_FREE_GC() macro are routed here.  The macro allows variable
- * name, filename, and line number information to be provided.
- *
- * @param var      The variable name of the GC being freed.
- * @param filename The filename where the GC is being freed.
- * @param line     The line number of @a filename where the GC is
- *                 being freed.
- * @param d        The Display for the GC.
- * @param gc       The GC to be freed.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, X_FREE_GC()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_x_free_gc(const char *var, const char *filename, unsigned long line, Display * d, GC gc)
-{
-    D_MEM(("spifmem_x_free_gc() called for variable %s (0x%08x) at %s:%lu\n", var, gc, NONULL(filename), line));
-    if (gc) {
-        if (DEBUG_LEVEL >= DEBUG_MEM) {
-            memrec_rem_var(&gc_rec, var, NONULL(filename), line, (void *) gc);
-        }
-        XFreeGC(d, gc);
-    } else {
-        D_MEM(("ERROR:  Caught attempt to free NULL GC\n"));
-    }
-}
-
-/**
- * Dump listing of tracked GC's.
- *
- * This function simply calls memrec_dump_resources() and passes in
- * the address of the #gc_rec variable.
- *
- * @see @link DOXGRP_MEM Memory Management Subsystem @endlink, GC_DUMP(), memrec_dump_resources()
- * @ingroup DOXGRP_MEM
- */
-void
-spifmem_dump_gc_tables(void)
-{
-    fprintf(LIBAST_DEBUG_FD, "Dumping X11 GC allocation table:\n");
-    memrec_dump_resources(&gc_rec);
-}
-#endif
 
 /**
  * Free an array of pointers.
@@ -886,27 +265,34 @@ spiftool_free_array(void *list, size_t count)
  * This group of functions/defines/macros implements the memory
  * management subsystem within LibAST.
  *
- * LibAST provides a robust mechanism for tracking memory allocations
- * and deallocations.  This system employs macro-based wrappers
- * around the standard libc malloc/realloc/calloc/free routines, other
- * libc fare such as strdup(), Xlib GC and Pixmap create/free
- * routines, and even Imlib2's own pixmap functions.
+ * LibAST provides a mechanism for tracking resource allocations and
+ * deallocations.  This system employs macro-based wrappers around
+ * various resource allocators/deallocators such as Xlib GC and Pixmap
+ * create/free routines and Imlib2 pixmap functions.
  *
  * To take advantage of this system, simply substitute the macro
  * versions in place of the standard versions throughout your code
- * (e.g., use MALLOC() instead of malloc(), X_FREE_GC() instead of
- * XFreeGC(), etc.).  If DEBUG is set to a value higher than
- * DEBUG_MEM, the LibAST-custom versions of these functions will be
- * used.  Of course, if memory debugging has not been requested, the
- * original libc/XLib/Imlib2 versions will be used instead, so that
- * you only incur the debugging overhead when you want it.
+ * (e.g., X_FREE_GC() instead of XFreeGC()).  If DEBUG is set to a
+ * value higher than DEBUG_MEM, the LibAST-custom versions of these
+ * functions will be used.  Of course, if memory debugging has not
+ * been requested, the original libc/XLib/Imlib2 versions will be used
+ * instead, so that you only incur the debugging overhead when you
+ * want it.
  *
- * LibAST has also been designed to work effectively with Gray
- * Watson's excellent malloc-debugging library, dmalloc
- * (http://dmalloc.com/), either instead of or in addition to its own
- * memory tracking routines.  Unlike LibAST, dmalloc supplements
- * memory allocation tracking with fence-post checking, freed pointer
- * reuse detection, and other very handy features.
+ * You can also define your own macros to wrap allocators and
+ * deallocators if LibAST doesn't already contain support for the
+ * resources you wish to track.  Simply call spifmem_add_var(),
+ * spifmem_chg_var(), and spifmem_rem_var() whenever the resource is
+ * created, resized, or deleted (respectively).
+ *
+ * NOTE: If your compiler does not support compound statement
+ * expressions (i.e., a code block whose final statement specifies the
+ * value of a parenthesized expression, such as:
+ * ({int a = 1, b = 2; a *= b; b += a; a+b;})),
+ * LibAST's built-in wrapper macros will not be available to you, nor
+ * are you likely to be able to wrap many allocator functions with
+ * your own macros.  In these situations, you'll need to call the
+ * LibAST memory routines separately.
  *
  * A small sample program demonstrating use of LibAST's memory
  * management system can be found
@@ -927,20 +313,20 @@ spiftool_free_array(void *list, size_t count)
  * @code
  * $ ./mem_example 
  * [1045859036]        mem.c |  246: spifmem_malloc(): 500 bytes requested at mem_example.c:27
- * [1045859036]        mem.c |   74: memrec_add_var(): Adding variable (0x8049a20, 500 bytes) from mem_example.c:27.
- * [1045859036]        mem.c |   75: memrec_add_var(): Storing as pointer #1 at 0x8049c18 (from 0x8049c18).
+ * [1045859036]        mem.c |   74: spifmem_add_var(): Adding variable (0x8049a20, 500 bytes) from mem_example.c:27.
+ * [1045859036]        mem.c |   75: spifmem_add_var(): Storing as pointer #1 at 0x8049c18 (from 0x8049c18).
  * [1045859036]        mem.c |  329: spifmem_strdup(): Variable pointer (0x8049a20) at mem_example.c:36
  * [1045859036]        mem.c |  246: spifmem_malloc(): 16 bytes requested at mem_example.c:36
- * [1045859036]        mem.c |   74: memrec_add_var(): Adding variable (0x8049c40, 16 bytes) from mem_example.c:36.
- * [1045859036]        mem.c |   75: memrec_add_var(): Storing as pointer #2 at 0x8049c7c (from 0x8049c58).
+ * [1045859036]        mem.c |   74: spifmem_add_var(): Adding variable (0x8049c40, 16 bytes) from mem_example.c:36.
+ * [1045859036]        mem.c |   75: spifmem_add_var(): Storing as pointer #2 at 0x8049c7c (from 0x8049c58).
  * [1045859036]        mem.c |  312: spifmem_free(): Variable dup (0x8049c40) at mem_example.c:39
- * [1045859036]        mem.c |   94: memrec_find_var(): Found pointer #2 stored at 0x8049c7c (from 0x8049c58)
- * [1045859036]        mem.c |  113: memrec_rem_var(): Removing variable dup (0x8049c40) of size 16
+ * [1045859036]        mem.c |   94: spifmem_find_var(): Found pointer #2 stored at 0x8049c7c (from 0x8049c58)
+ * [1045859036]        mem.c |  113: spifmem_rem_var(): Removing variable dup (0x8049c40) of size 16
  * [1045859036]        mem.c |  312: spifmem_free(): Variable dup (   (nil)) at mem_example.c:43
  * [1045859036]        mem.c |  319: spifmem_free(): ERROR:  Caught attempt to free NULL pointer
  * [1045859036]        mem.c |  268: spifmem_realloc(): Variable pointer (0x8049a20 -> 1000) at mem_example.c:46
- * [1045859036]        mem.c |   94: memrec_find_var(): Found pointer #1 stored at 0x8049c58 (from 0x8049c58)
- * [1045859036]        mem.c |  132: memrec_chg_var(): Changing variable pointer (0x8049a20, 500 -> 0x8049c80, 1000)
+ * [1045859036]        mem.c |   94: spifmem_find_var(): Found pointer #1 stored at 0x8049c58 (from 0x8049c58)
+ * [1045859036]        mem.c |  132: spifmem_chg_var(): Changing variable pointer (0x8049a20, 500 -> 0x8049c80, 1000)
  * Dumping memory allocation table:
  * PTR:  1 pointers stored.
  * PTR:   Pointer |       Filename       |  Line  |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  

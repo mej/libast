@@ -96,6 +96,11 @@
 #  define LIBAST_COMPAT_05_API 0
 #endif
 
+/* App-definable; requests 0.7 API compatibility. */
+#ifndef LIBAST_COMPAT_07_API
+#  define LIBAST_COMPAT_07_API 0
+#endif
+
 /* A bunch of security checks. */
 #ifndef HAVE_RLIMIT_MEMLOCK
 #  define HAVE_RLIMIT_MEMLOCK 0
