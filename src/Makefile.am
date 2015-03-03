@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES = libast.la
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE)
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE) -I$(top_builddir)/include
 AM_CFLAGS = $(PTHREAD_CFLAGS)
 AM_LDFLAGS = $(PTHREAD_LIBS)
 
