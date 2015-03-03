@@ -5,7 +5,7 @@
 
 Summary: Library of Assorted Spiffy Things
 Name: libast
-Version: 0.7.1
+Version: 0.8
 #Release: 1
 Release: 0.%(date '+%Y%m%d')
 Group: System Environment/Libraries
