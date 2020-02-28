@@ -10,6 +10,7 @@ macrodir = $(datadir)/aclocal
 EXTRA_DIST = DESIGN LICENSE README $(MACROS) libast.spec
 MAINTAINERCLEANFILES = Makefile.in *~ aclocal.m4 config.guess config.sub configure depcomp \
     install-sh ltconfig ltmain.sh missing mkinstalldirs stamp-h* *.log config.h.in
+DISTCLEANFILES = Makefile
 
 test: all
 	cd test && $(MAKE) test
