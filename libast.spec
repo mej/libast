@@ -1,3 +1,5 @@
+%{!?_rel:%{expand:%%global _rel 0.%(git describe --abbrev=4 --always --tags --long --dirty=.1 | cut -d- -f 2- | tr '-' '.')}}
+
 %define __os_install_post /usr/lib/rpm/brp-compress
 %if %{!?optflags:1}0
 %{expand:%%define optflags %{!?el8:${RPM_OPT_FLAGS:--O0 -g3}}%{?el8:-O2 -ggdb3 -fPIC}}
@@ -5,9 +7,8 @@
 
 Summary: Library of Assorted Spiffy Things
 Name: libast
-Version: 0.8
-#Release: 1
-Release: 0.%(date '+%Y%m%d')%{?dist}
+Version: 0.8.1
+Release: %{_rel}%{?dist}
 Group: System Environment/Libraries
 License: BSD
 URL: http://www.eterm.org/
