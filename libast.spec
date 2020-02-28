@@ -7,7 +7,7 @@ Summary: Library of Assorted Spiffy Things
 Name: libast
 Version: 0.8
 #Release: 1
-Release: 0.%(date '+%Y%m%d')
+Release: 0.%(date '+%Y%m%d')%{?dist}
 Group: System Environment/Libraries
 License: BSD
 URL: http://www.eterm.org/
