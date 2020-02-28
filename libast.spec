@@ -1,11 +1,11 @@
 %define __os_install_post /usr/lib/rpm/brp-compress
 %if %{!?optflags:1}0
-%define optflags ${RPM_OPT_FLAGS:--O0 -g3}
+%{expand:%%define optflags %{!?el8:${RPM_OPT_FLAGS:--O0 -g3}}%{?el8:-O2 -ggdb3 -fPIC}}
 %endif
 
 Summary: Library of Assorted Spiffy Things
 Name: libast
-Version: 0.7.1
+Version: 0.8
 #Release: 1
 Release: 0.%(date '+%Y%m%d')
 Group: System Environment/Libraries
