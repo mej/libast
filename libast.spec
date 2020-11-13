@@ -1,20 +1,24 @@
-%{!?_rel:%{expand:%%global _rel 0.%(git describe --abbrev=4 --always --tags --long --dirty=.1 | cut -d- -f 2- | tr '-' '.')}}
+%{expand:%%global gd_head %(git describe --tags HEAD)}
+%{expand:%%global gd_rel_delta %(git describe --abbrev=4 --always --tags --long --match 'v[[:digit:]][[:alnum:].]*[[:alnum:]]' --dirty=.1 | cut -d- -f 2- | tr '-' '.')}
+%global rel_pre_post %(echo "%{gd_head}" | grep -Eq '^v%{version}' >&/dev/null && echo 1. || echo 0.)
+%{!?rel:%global rel %{rel_pre_post}%{gd_rel_delta}%{?dist}}
 
-%define __os_install_post /usr/lib/rpm/brp-compress
-%if %{!?optflags:1}0
-%{expand:%%define optflags %{!?el8:${RPM_OPT_FLAGS:--O0 -g3}}%{?el8:-O2 -ggdb3 -fPIC}}
-%endif
+%global name    libast
+%global version 0.8.1
+%global release %{rel}
+
 
 Summary: Library of Assorted Spiffy Things
-Name: libast
-Version: 0.8.1
-Release: %{_rel}%{?dist}
+Name: %{name}
+Version: %{version}
+Release: %{release}
 Group: System Environment/Libraries
 License: BSD
 URL: http://www.eterm.org/
 Source: %{name}-%{version}.tar.gz
 #BuildSuggests: pcre-devel xorg-x11-devel imlib2-devel
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
+
 
 %description
 LibAST is the Library of Assorted Spiffy Things.  It contains various
@@ -25,35 +29,40 @@ well as some debugging aids and other similar tools.
 It's not documented yet, mostly because it's not finished.  Hence the
 version number that begins with 0.
 
+
 %prep
 %setup -q
 
-%build
-CFLAGS="%{optflags}"
-export CFLAGS
 
+%build
 %{configure} --prefix=%{_prefix} --bindir=%{_bindir} --libdir=%{_libdir} \
              --includedir=%{_includedir} --datadir=%{_datadir} %{?acflags}
 %{__make} %{?_smp_mflags} %{?mflags}
 
+
 %install
-%{__make} install DESTDIR=$RPM_BUILD_ROOT %{?mflags_install}
+%{__make} install DESTDIR=%{buildroot} %{?mflags_install}
+
 
 %post
 test -x /sbin/ldconfig && /sbin/ldconfig || :
 
+
 %postun
 test -x /sbin/ldconfig && /sbin/ldconfig || :
 
+
 %clean
-rm -rf $RPM_BUILD_ROOT
+test "%{buildroot}" != "/" && rm -rf %{buildroot}
+
 
 %files
-%defattr(-, root, root)
+%defattr(-, root, root, 0755)
 %doc ChangeLog DESIGN LICENSE README
 %{_bindir}/*
 %{_libdir}/*
 %{_includedir}/*
 %{_datadir}/*
+
 
 %changelog
