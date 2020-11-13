@@ -36,8 +36,7 @@ AC_CONFIG_MACRO_DIR([.])
 
 AC_CONFIG_HEADERS([config.h include/libast/sysdefs.h])
 AC_CONFIG_FILES([include/libast/types.h Makefile include/Makefile
-                 include/libast/Makefile src/Makefile test/Makefile
-                 libast-config])
+                 src/Makefile test/Makefile libast-config])
 
 dnl# Set some basic variables
 AUTHORS="Michael Jennings (mej@eterm.org and mej@lbl.gov)"
