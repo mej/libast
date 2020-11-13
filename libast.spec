@@ -1,6 +1,6 @@
 %{expand:%%global gd_head %(git describe --tags HEAD)}
-%{expand:%%global gd_rel_delta %(git describe --abbrev=4 --always --tags --long --match 'v[[:digit:]][[:alnum:].]*[[:alnum:]]' --dirty=.1 | cut -d- -f 2- | tr '-' '.')}
-%global rel_pre_post %(echo "%{gd_head}" | grep -Eq '^v%{version}' >&/dev/null && echo 1. || echo 0.)
+%{expand:%%global gd_rel_delta %(git describe --abbrev=4 --always --tags --long --match '[[:digit:]][[:alnum:].]*[[:alnum:]]' --dirty=.1 | cut -d- -f 2- | tr '-' '.')}
+%global rel_pre_post %(echo "%{gd_head}" | grep -Eq '^%{version}' >&/dev/null && echo 1. || echo 0.)
 %{!?rel:%global rel %{rel_pre_post}%{gd_rel_delta}%{?dist}}
 
 %global name    libast
