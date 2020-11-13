@@ -17,4 +17,4 @@ libast/sysdefs.h: libast/sysdefs.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 MAINTAINERCLEANFILES = Makefile.in
-DISTCLEANFILES = libast/sysdefs.h libast/types.h
+DISTCLEANFILES = Makefile libast/sysdefs.h libast/types.h

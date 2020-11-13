@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES = libast.la
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE) -I$(top_builddir)/include
+AM_CPPFLAGS = -I../include -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE)
 AM_CFLAGS = $(PTHREAD_CFLAGS)
 AM_LDFLAGS = $(PTHREAD_LIBS)
 
@@ -13,3 +13,4 @@ snprintf.c tok.c url.c ustr.c
 
 libast_la_LDFLAGS = -version-info 2:2:0
 MAINTAINERCLEANFILES = Makefile.in
+DISTCLEANFILES = Makefile

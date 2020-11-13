@@ -1,6 +1,6 @@
 EXTRA_PROGRAMS = libast-test libast-perf
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE)
+AM_CPPFLAGS = -I../include -I$(top_srcdir)/include -I$(top_srcdir)/include/$(PACKAGE)
 
 libast_test_SOURCES = test.c test.h
 libast_test_DEPENDENCIES = $(top_builddir)/src/libast.la
@@ -20,3 +20,4 @@ perf: libast-perf
 
 .PHONY: test
 MAINTAINERCLEANFILES = Makefile.in
+DISTCLEANFILES = Makefile

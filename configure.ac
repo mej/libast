@@ -29,8 +29,10 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-AC_INIT(configure.ac)
-AM_INIT_AUTOMAKE([libast], [0.8])
+AC_INIT([LibAST], [0.8.1])
+AC_CONFIG_SRCDIR([configure.ac])
+AM_INIT_AUTOMAKE
+
 AC_DEFINE_UNQUOTED(LIBAST_VERSION, "$VERSION", [Version])
 AC_CONFIG_MACRO_DIR([.])
 
@@ -39,7 +41,7 @@ AC_CONFIG_FILES([include/libast/types.h Makefile include/Makefile
                  src/Makefile test/Makefile libast-config])
 
 dnl# Set some basic variables
-AUTHORS="Michael Jennings (mej@eterm.org and mej@lbl.gov)"
+AUTHORS="Michael Jennings (mej@eterm.org and mej@lanl.gov)"
 AC_SUBST(AUTHORS)
 AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS", [Authors])
 
