@@ -24,7 +24,7 @@ case $1 in
     echo "Usage:  libast-config [--version] [--prefix] [--exec-prefix] [--cppflags] [--ldflags] [--libs] [--support]"
     ;;
   -v | --version | -version)
-    echo "Libary of Assorted Spiffy Things:  libast $VERSION"
+    echo "Library of Assorted Spiffy Things:  libast $VERSION"
     ;;
   -p | --prefix | -prefix)
     echo "$prefix"
