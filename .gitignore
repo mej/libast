@@ -10,6 +10,7 @@ Makefile.in
 aclocal.m4
 libtool.m4
 lt*.m4
+compile
 config.status
 config.h
 libtool
