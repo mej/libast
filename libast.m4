@@ -198,7 +198,7 @@ AC_DEFUN([AST_X11_SUPPORT], [
     if test "x$no_x" != "xyes"; then
         AC_CHECK_LIB(X11, XOpenDisplay, [
                          LIBAST_X11_SUPPORT="X11"
-                         GRLIBS="-lX11"
+                         GRLIBS="-lX11 $GRLIBS"
                          AC_DEFINE([LIBAST_X11_SUPPORT], [1], [Define for X11 support.])
                      ])
     fi
@@ -228,7 +228,7 @@ AC_DEFUN([AST_IMLIB2_SUPPORT], [
     if test $USE_IMLIB -eq 1 ; then
         AC_CHECK_PROG(IMLIB2_CONFIG, imlib2-config, imlib2-config)
             if test "x$IMLIB2_CONFIG" != "x"; then
-                GRLIBS="`$IMLIB2_CONFIG --libs`"
+                GRLIBS="`$IMLIB2_CONFIG --libs` $GRLIBS"
                 CFLAGS="$CFLAGS `$IMLIB2_CONFIG --cflags`"
                 AC_DEFINE([LIBAST_IMLIB2_SUPPORT], [1], [Define for Imlib2 support.])
                 LIBAST_IMLIB2_SUPPORT="Imlib2"
