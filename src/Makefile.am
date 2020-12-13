@@ -11,6 +11,6 @@ dlinked_list.c file.c linked_list.c mbuff.c mem.c module.c msgs.c	\
 obj.c objpair.c options.c pthreads.c regexp.c socket.c str.c strings.c	\
 snprintf.c tok.c url.c ustr.c
 
-libast_la_LDFLAGS = -version-info 2:2:0
+libast_la_LDFLAGS = -version-info 2:2:0 -no-undefined
 MAINTAINERCLEANFILES = Makefile.in
 DISTCLEANFILES = Makefile
